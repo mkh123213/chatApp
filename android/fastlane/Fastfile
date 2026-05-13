@@ -1,0 +1,24 @@
+
+default_platform(:android)
+
+# To run the lane, execute the following command:
+# bundle exec fastlane firebase_distribution
+
+platform :android do
+  desc "Lane for Android Firebase App Distribution"
+  lane :firebase_distribution do
+    token = ENV["FIREBASE_CLI_TOKEN"]
+    UI.user_error!("FIREBASE_CLI_TOKEN is not set. Run `firebase login:ci` and export the token.") if token.nil? || token.strip.empty?
+
+    sh "flutter clean"
+    sh "flutter build apk --release --flavor production --target lib/main_production.dart --no-tree-shake-icons"
+    firebase_app_distribution(
+        app: "1:940046231017:android:dd6d7394002c8dc8635778",
+        firebase_cli_token: token,
+        android_artifact_type: "APK",
+        android_artifact_path: "../build/app/outputs/flutter-apk/app-production-release.apk",
+        testers: "mohammadwork1996700@gmail.com",
+        release_notes: "Testing something with GitHub Actions, trying to push directly from master branch",
+    )
+  end
+end
