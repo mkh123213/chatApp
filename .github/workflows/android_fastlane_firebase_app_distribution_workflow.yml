@@ -28,7 +28,7 @@ jobs:
       run: flutter pub get
 
     - name: Build APK
-      run: flutter build apk --release --flavor production --target lib/main_production.dart
+      run: flutter build apk --release --flavor Production --target lib/main.dart
 
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
