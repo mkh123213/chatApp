@@ -6,7 +6,9 @@ import 'package:chat_material3/core/helper_functions/get_current_user.dart';
 import 'package:chat_material3/core/service/call_service/call_provider_service.dart';
 import 'package:chat_material3/features/calls/data/models/call_model.dart';
 import 'package:chat_material3/features/calls/data/models/call_status.dart';
+import 'package:chat_material3/features/calls/data/repositories/calls_repo.dart';
 import 'package:chat_material3/features/calls/presentation/bloc/active_call_cubit/active_call_cubit.dart';
+import 'package:chat_material3/features/calls/presentation/bloc/active_call_cubit/active_call_state.dart';
 import 'package:chat_material3/features/calls/presentation/refactor/call_body.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,15 +23,54 @@ class CallScreen extends StatefulWidget {
   State<CallScreen> createState() => _CallScreenState();
 }
 
-class _CallScreenState extends State<CallScreen> {
+class _CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
   late final CallProviderService _callProvider;
+  late final CallsRepo _callsRepo;
+  late final ActiveCallCubit _activeCallCubit;
+  StreamSubscription<int?>? _remoteUserSub;
   Timer? _missedCallTimer;
+  bool _callEnded = false;
+  bool _remoteUserJoined = false;
+  CallModel? _latestCall;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _callProvider = sl<CallProviderService>();
+    _callsRepo = sl<CallsRepo>();
+    _activeCallCubit = sl<ActiveCallCubit>()
+      ..listenToCall(callId: widget.call.id);
+    _activeCallCubit.stream.listen((state) {
+      if (state is ActiveCallActive) {
+        _latestCall = state.call;
+      }
+    });
     _initializeCall();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.detached ||
+        state == AppLifecycleState.paused) {
+      _endCallOnTermination();
+    }
+  }
+
+  Future<void> _endCallOnTermination() async {
+    if (_callEnded) return;
+    _callEnded = true;
+
+    final call = _latestCall ?? widget.call;
+    if (call.status == CallStatus.ringing ||
+        call.status == CallStatus.missed) {
+      await _callsRepo.missCall(callId: call.id);
+    } else if (call.status == CallStatus.accepted) {
+      final duration = call.acceptedAt != null
+          ? DateTime.now().difference(call.acceptedAt!).inSeconds
+          : 0;
+      await _callsRepo.endCall(callId: call.id, durationInSeconds: duration);
+    }
   }
 
   Future<void> _initializeCall() async {
@@ -62,7 +103,19 @@ class _CallScreenState extends State<CallScreen> {
       isVideo: isVideo,
     );
 
+    _listenForRemoteUserLeave();
     _startMissedCallTimerIfCaller();
+  }
+
+  void _listenForRemoteUserLeave() {
+    _remoteUserSub = _callProvider.onRemoteUserChanged.listen((uid) {
+      if (uid != null) {
+        _remoteUserJoined = true;
+      } else if (_remoteUserJoined && uid == null) {
+        _endCallOnTermination();
+        if (mounted) Navigator.of(context).pop();
+      }
+    });
   }
 
   void _startMissedCallTimerIfCaller() {
@@ -71,7 +124,7 @@ class _CallScreenState extends State<CallScreen> {
         widget.call.status == CallStatus.ringing) {
       _missedCallTimer = Timer(const Duration(seconds: 30), () {
         if (mounted) {
-          context.read<ActiveCallCubit>().missCall(call: widget.call);
+          _activeCallCubit.missCall(call: widget.call);
         }
       });
     }
@@ -79,16 +132,19 @@ class _CallScreenState extends State<CallScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _remoteUserSub?.cancel();
     _missedCallTimer?.cancel();
+    _endCallOnTermination();
     _callProvider.dispose();
+    _activeCallCubit.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) =>
-          sl<ActiveCallCubit>()..listenToCall(callId: widget.call.id),
+    return BlocProvider.value(
+      value: _activeCallCubit,
       child: Scaffold(
         backgroundColor: Colors.black87,
         body: SafeArea(

@@ -1,9 +1,11 @@
 import 'package:chat_material3/core/common/toast/show_toast.dart';
 import 'package:chat_material3/features/calls/data/models/call_model.dart';
+import 'package:chat_material3/features/calls/data/models/call_status.dart';
 import 'package:chat_material3/features/calls/presentation/bloc/active_call_cubit/active_call_cubit.dart';
 import 'package:chat_material3/features/calls/presentation/bloc/active_call_cubit/active_call_state.dart';
 import 'package:chat_material3/features/calls/presentation/widgets/call_controls.dart';
 import 'package:chat_material3/features/calls/presentation/widgets/call_header.dart';
+import 'package:chat_material3/features/calls/presentation/widgets/call_video_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -29,11 +31,32 @@ class ActiveCallBlocConsumer extends StatelessWidget {
           _ => initialCall,
         };
 
-        return Column(
+        final isVideo = call.type == CallType.video;
+
+        return Stack(
           children: [
-            CallHeader(call: call),
-            const Spacer(),
-            CallControls(
+            if (isVideo)
+              Positioned.fill(child: CallVideoView(channelId: call.channelId)),
+            Column(
+              children: [
+                if (!isVideo) CallHeader(call: call),
+                if (isVideo)
+                  SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        call.status == CallStatus.accepted
+                            ? ''
+                            : 'Connecting...',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                const Spacer(),
+                CallControls(
               call: call,
               onEndCall: () {
                 final duration = call.acceptedAt != null
@@ -46,6 +69,8 @@ class ActiveCallBlocConsumer extends StatelessWidget {
                       durationInSeconds: duration,
                     );
               },
+            ),
+              ],
             ),
           ],
         );

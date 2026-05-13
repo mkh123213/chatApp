@@ -13,6 +13,8 @@ class MessagesCubit extends Cubit<MessagesState> {
 
   final MessagesRepo _messagesRepo;
   StreamSubscription<List<MessageModel>>? _messagesSubscription;
+  String? _activeChatId;
+  String? _activeUserId;
 
   void loadMessages({required String chatId}) {
     emit(const MessagesLoading());
@@ -25,6 +27,9 @@ class MessagesCubit extends Cubit<MessagesState> {
           emit(const MessagesEmpty());
         } else {
           emit(MessagesLoaded(messages: messages));
+        }
+        if (_activeChatId != null && _activeUserId != null) {
+          markAsRead(chatId: _activeChatId!, currentUserId: _activeUserId!);
         }
       },
       onError: (error) {
@@ -64,6 +69,8 @@ class MessagesCubit extends Cubit<MessagesState> {
     required String chatId,
     required String currentUserId,
   }) async {
+    _activeChatId = chatId;
+    _activeUserId = currentUserId;
     await _messagesRepo.markMessagesAsRead(
       chatId: chatId,
       currentUserId: currentUserId,

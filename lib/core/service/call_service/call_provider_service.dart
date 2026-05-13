@@ -18,5 +18,11 @@ abstract class CallProviderService {
 
   Future<void> switchCamera();
 
+  dynamic get engine;
+
+  int? get remoteUid;
+
+  Stream<int?> get onRemoteUserChanged;
+
   Future<void> dispose();
 }

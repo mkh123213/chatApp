@@ -1,9 +1,22 @@
+import 'dart:async';
+
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:chat_material3/constants/agora_constants.dart';
 import 'package:chat_material3/core/service/call_service/call_provider_service.dart';
 
 class AgoraCallProviderService implements CallProviderService {
   RtcEngine? _engine;
+  int? _remoteUid;
+  final _remoteUidController = StreamController<int?>.broadcast();
+
+  @override
+  RtcEngine? get engine => _engine;
+
+  @override
+  int? get remoteUid => _remoteUid;
+
+  @override
+  Stream<int?> get onRemoteUserChanged => _remoteUidController.stream;
 
   @override
   Future<void> initialize() async {
@@ -12,6 +25,19 @@ class AgoraCallProviderService implements CallProviderService {
       appId: agoraAppId,
       channelProfile: ChannelProfileType.channelProfileCommunication,
     ));
+
+    _engine!.registerEventHandler(
+      RtcEngineEventHandler(
+        onUserJoined: (connection, remoteUid, elapsed) {
+          _remoteUid = remoteUid;
+          _remoteUidController.add(remoteUid);
+        },
+        onUserOffline: (connection, remoteUid, reason) {
+          _remoteUid = null;
+          _remoteUidController.add(null);
+        },
+      ),
+    );
   }
 
   @override
@@ -74,5 +100,7 @@ class AgoraCallProviderService implements CallProviderService {
     await _engine?.leaveChannel();
     await _engine?.release();
     _engine = null;
+    _remoteUid = null;
+    await _remoteUidController.close();
   }
 }
