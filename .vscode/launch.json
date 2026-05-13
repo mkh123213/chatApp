@@ -1,0 +1,31 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Chat Development",
+      "request": "launch",
+      "flutterMode": "debug",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": [
+        "--flavor",
+        "Development",
+        "--target",
+        "lib/main.dart"
+      ]
+    },
+    {
+      "name": "Chat Production",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "program": "lib/main.dart",
+      "args": [
+        "--flavor",
+        "Production",
+        "--target",
+        "lib/main.dart"
+      ]
+    }
+  ],
+}
