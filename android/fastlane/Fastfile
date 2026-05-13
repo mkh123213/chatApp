@@ -16,7 +16,9 @@ platform :android do
         app: "1:350279689384:android:05ea79ec594293e42e0e9d",
         firebase_cli_token: token,
         android_artifact_type: "APK",
-        android_artifact_path: "../build/app/outputs/flutter-apk/app-production-release.apk",
+        android_artifact_path: "../build/app/outputs/flutter-apk/app-x86_64-production-release.apk",
+        android_artifact_path: "../build/app/outputs/flutter-apk/app-arm64-v8a-production-release.apk",
+        android_artifact_path: "../build/app/outputs/flutter-apk/app-x86_64-production-release.apk",
         testers: "mohammadwork1996700@gmail.com",
         release_notes: "Testing something with GitHub Actions, trying to push directly from master branch",
     )
