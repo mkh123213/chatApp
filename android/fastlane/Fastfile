@@ -11,7 +11,7 @@ platform :android do
     UI.user_error!("FIREBASE_CLI_TOKEN is not set. Run `firebase login:ci` and export the token.") if token.nil? || token.strip.empty?
 
     sh "flutter clean"
-    sh "flutter build apk --release --flavor production --target lib/main_production.dart --no-tree-shake-icons"
+    sh "flutter build apk --release --flavor Production --target lib/main.dart --no-tree-shake-icons"
     firebase_app_distribution(
         app: "1:940046231017:android:dd6d7394002c8dc8635778",
         firebase_cli_token: token,
