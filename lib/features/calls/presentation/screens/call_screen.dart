@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chat_material3/constants/agora_constants.dart';
 import 'package:chat_material3/core/di/injection_container.dart';
 import 'package:chat_material3/core/helper_functions/get_current_user.dart';
 import 'package:chat_material3/core/service/call_service/call_provider_service.dart';
@@ -32,13 +33,33 @@ class _CallScreenState extends State<CallScreen> {
   }
 
   Future<void> _initializeCall() async {
-    await [Permission.microphone, Permission.camera].request();
+    final isVideo = widget.call.type == CallType.video;
+    final permissions = <Permission>[Permission.microphone];
+    if (isVideo) permissions.add(Permission.camera);
+
+    final statuses = await permissions.request();
+    final micGranted = statuses[Permission.microphone]?.isGranted ?? false;
+    final cameraGranted =
+        !isVideo || (statuses[Permission.camera]?.isGranted ?? false);
+
+    if (!micGranted || !cameraGranted) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Microphone and camera permissions are required'),
+          ),
+        );
+        Navigator.of(context).pop();
+      }
+      return;
+    }
+
     await _callProvider.initialize();
     await _callProvider.joinChannel(
       channelId: widget.call.channelId,
-      token: '',
+      token: agoraToken,
       uid: getCurrentUser().uid.hashCode,
-      isVideo: widget.call.type == CallType.video,
+      isVideo: isVideo,
     );
 
     _startMissedCallTimerIfCaller();
@@ -66,8 +87,8 @@ class _CallScreenState extends State<CallScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => sl<ActiveCallCubit>()
-        ..listenToCall(callId: widget.call.id),
+      create: (_) =>
+          sl<ActiveCallCubit>()..listenToCall(callId: widget.call.id),
       child: Scaffold(
         backgroundColor: Colors.black87,
         body: SafeArea(

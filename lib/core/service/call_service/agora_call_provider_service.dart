@@ -27,17 +27,18 @@ class AgoraCallProviderService implements CallProviderService {
     await engine.enableAudio();
     if (isVideo) {
       await engine.enableVideo();
+      await engine.startPreview();
     }
 
     await engine.joinChannel(
       token: token,
       channelId: channelId,
       uid: uid,
-      options: const ChannelMediaOptions(
+      options: ChannelMediaOptions(
         autoSubscribeAudio: true,
-        autoSubscribeVideo: true,
+        autoSubscribeVideo: isVideo,
         publishMicrophoneTrack: true,
-        publishCameraTrack: true,
+        publishCameraTrack: isVideo,
         clientRoleType: ClientRoleType.clientRoleBroadcaster,
       ),
     );

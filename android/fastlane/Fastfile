@@ -7,13 +7,13 @@ default_platform(:android)
 platform :android do
   desc "Lane for Android Firebase App Distribution"
   lane :firebase_distribution do
-    token = ENV["FIREBASE_CLI_TOKEN"]
+    token = '1//03f7-nZZZ-Y80CgYIARAAGAMSNwF-L9Ir0vnDk1o8iLScAZ5RH_UXuO3ulVBi6kmFz5wnt3gzqaZ7WxfWSGPxdRaS5EGgiEPDx9c'
     UI.user_error!("FIREBASE_CLI_TOKEN is not set. Run `firebase login:ci` and export the token.") if token.nil? || token.strip.empty?
 
     sh "flutter clean"
     sh "flutter build apk --release --flavor Production --target lib/main.dart --no-tree-shake-icons"
     firebase_app_distribution(
-        app: "1:940046231017:android:dd6d7394002c8dc8635778",
+        app: "1:350279689384:android:05ea79ec594293e42e0e9d",
         firebase_cli_token: token,
         android_artifact_type: "APK",
         android_artifact_path: "../build/app/outputs/flutter-apk/app-production-release.apk",
