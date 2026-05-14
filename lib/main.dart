@@ -5,7 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:chat_material3/core/app/env.variables.dart';
+import 'package:chat_material3/core/service/env/env_variable.dart';
 import 'package:chat_material3/core/di/injection_container.dart';
 import 'package:chat_material3/core/service/hive/hive_database.dart';
 import 'package:chat_material3/core/service/push_notification/firebase_cloud_messaging.dart';
@@ -14,7 +14,7 @@ import 'package:chat_material3/core/helper_functions/get_current_user.dart';
 import 'package:chat_material3/core/service/shared_pref/pref_keys.dart';
 import 'package:chat_material3/core/service/shared_pref/shared_pref.dart';
 import 'package:chat_material3/core/service/push_notification/chat_notification_service.dart';
-import 'package:chat_material3/features/single_chat/data/services/user_presence_service.dart';
+import 'package:chat_material3/core/service/user_presence/user_presence_service.dart';
 import 'package:chat_material3/core/service/call_service/callkit_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

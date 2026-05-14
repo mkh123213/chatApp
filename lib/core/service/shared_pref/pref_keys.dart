@@ -1,3 +1,5 @@
+// REUSABLE SERVICE: Copy this file and update keys for your project.
+// CHANGE: Add/remove/rename keys to match your project's stored preferences.
 class PrefKeys {
   static const String themeMode = 'mode';
   static const String language = 'language';

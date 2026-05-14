@@ -109,4 +109,15 @@ class MessagesRepoImpl implements MessagesRepo {
       currentUserId: currentUserId,
     );
   }
+
+  @override
+  Future<void> markMessagesByIdsAsRead({
+    required String chatId,
+    required List<String> messageIds,
+  }) {
+    return _messagesRemoteDataSource.markMessagesByIdsAsRead(
+      chatId: chatId,
+      messageIds: messageIds,
+    );
+  }
 }

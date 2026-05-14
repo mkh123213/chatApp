@@ -1,6 +1,6 @@
 import 'package:chat_material3/core/app/app_cubit/cubit/app_cubit.dart';
-import 'package:chat_material3/core/app/connectivity_controller.dart';
-import 'package:chat_material3/core/app/env.variables.dart';
+import 'package:chat_material3/core/service/connectivity/connectivity_controller.dart';
+import 'package:chat_material3/core/service/env/env_variable.dart';
 import 'package:chat_material3/core/common/screens/no_network_screen.dart';
 import 'package:chat_material3/core/di/injection_container.dart';
 import 'package:chat_material3/core/language/app_localizations_setup.dart';

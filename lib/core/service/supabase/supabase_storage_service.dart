@@ -1,3 +1,7 @@
+// REUSABLE SERVICE: Supabase Storage file upload/download wrapper.
+// REQUIRES: supabase_flutter, path packages in pubspec.yaml
+// CHANGE: Update `bucketName` to your Supabase storage bucket name.
+// CHANGE: Add/remove upload methods to match your project's file types (e.g., remove chat/group/status methods if not needed).
 import 'dart:io';
 
 import 'package:path/path.dart' as p;

@@ -29,7 +29,16 @@ class MessagesCubit extends Cubit<MessagesState> {
           emit(MessagesLoaded(messages: messages));
         }
         if (_activeChatId != null && _activeUserId != null) {
-          markAsRead(chatId: _activeChatId!, currentUserId: _activeUserId!);
+          final unreadIds = messages
+              .where((m) => !m.isRead && m.receiverId == _activeUserId)
+              .map((m) => m.id)
+              .toList();
+          if (unreadIds.isNotEmpty) {
+            _messagesRepo.markMessagesByIdsAsRead(
+              chatId: _activeChatId!,
+              messageIds: unreadIds,
+            );
+          }
         }
       },
       onError: (error) {

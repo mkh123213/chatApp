@@ -1,3 +1,5 @@
+// REUSABLE SERVICE: Abstract call provider interface. Works with any VoIP SDK.
+// CHANGE: Add/remove methods to match your call features.
 abstract class CallProviderService {
   Future<void> initialize();
 

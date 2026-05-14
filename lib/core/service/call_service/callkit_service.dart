@@ -1,7 +1,12 @@
-import 'package:chat_material3/core/di/injection_container.dart';
-import 'package:chat_material3/core/routes/app_routes.dart';
-import 'package:chat_material3/features/calls/data/models/call_model.dart';
-import 'package:chat_material3/features/calls/data/repositories/calls_repo.dart';
+// REUSABLE SERVICE: Native call UI (CallKit/Android CallScreen) handler.
+// REQUIRES: flutter_callkit_incoming, cloud_firestore packages in pubspec.yaml
+// CHANGE: Update DI import (injection_container) to your project's DI.
+// CHANGE: Update AppRoutes import to your project's route names.
+// CHANGE: Update CallModel and CallsRepo imports to your project's call models/repos.
+import 'package:chat_material3/core/di/injection_container.dart'; // CHANGE: your DI
+import 'package:chat_material3/core/routes/app_routes.dart'; // CHANGE: your routes
+import 'package:chat_material3/features/calls/data/models/call_model.dart'; // CHANGE: your call model
+import 'package:chat_material3/features/calls/data/repositories/calls_repo.dart'; // CHANGE: your calls repo
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_callkit_incoming/entities/android_params.dart';

@@ -5,7 +5,7 @@ import 'package:chat_material3/core/routes/app_routes.dart';
 import 'package:chat_material3/core/service/hive/hive_database.dart';
 import 'package:chat_material3/core/service/shared_pref/pref_keys.dart';
 import 'package:chat_material3/core/service/shared_pref/shared_pref.dart';
-import 'package:chat_material3/features/single_chat/data/services/user_presence_service.dart';
+import 'package:chat_material3/core/service/user_presence/user_presence_service.dart';
 
 class AppLogout {
   factory AppLogout() {

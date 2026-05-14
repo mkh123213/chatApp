@@ -1,3 +1,5 @@
+// REUSABLE SERVICE: Generic Firestore CRUD wrapper. Works in any Firebase project as-is.
+// REQUIRES: cloud_firestore package in pubspec.yaml
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 

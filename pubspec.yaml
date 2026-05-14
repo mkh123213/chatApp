@@ -61,7 +61,7 @@ dependencies:
   retrofit: ^4.9.2
   pretty_dio_logger: ^1.4.0
   firebase_messaging: ^16.2.0
-  googleapis_auth: ^2.3.0
+  firebase_analytics: ^12.3.0
   shared_preferences: ^2.5.5
   flutter_local_notifications: ^21.0.0
   package_info_plus: ^8.3.1

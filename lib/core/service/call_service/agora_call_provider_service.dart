@@ -1,7 +1,10 @@
+// REUSABLE SERVICE: Agora RTC implementation for voice/video calls.
+// REQUIRES: agora_rtc_engine package in pubspec.yaml
+// CHANGE: Update agora_constants import to your project's Agora App ID.
 import 'dart:async';
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
-import 'package:chat_material3/constants/agora_constants.dart';
+import 'package:chat_material3/constants/agora_constants.dart'; // CHANGE: your Agora App ID
 import 'package:chat_material3/core/service/call_service/call_provider_service.dart';
 
 class AgoraCallProviderService implements CallProviderService {

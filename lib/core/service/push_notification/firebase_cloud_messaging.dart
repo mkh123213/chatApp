@@ -1,9 +1,9 @@
-import 'package:dio/dio.dart';
+// REUSABLE SERVICE: FCM initialization, permission handling, and topic subscription.
+// REQUIRES: firebase_messaging package in pubspec.yaml
+// CHANGE: Update `subscribeKey` to your project's topic name.
+// CHANGE: Update FirebaseMessagingNavigate import to your project's navigation handler.
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:googleapis_auth/auth_io.dart' as auth;
-import 'package:chat_material3/core/app/env.variables.dart';
 import 'package:chat_material3/core/common/toast/show_toast.dart';
 import 'package:chat_material3/core/extensions/context_extension.dart';
 import 'package:chat_material3/core/language/lang_keys.dart';
@@ -109,112 +109,4 @@ class FirebaseCloudMessaging {
     debugPrint('====🔕 Notification Unsubscribed 🔕=====');
   }
 
-  // get access token
-  Future<String> getAccessToken() async {
-    try {
-      // Load the service account credentials JSON file
-      final jsonString = await rootBundle.loadString(
-        'assets/store-app-c9001-fa3b97881677.json',
-      );
-
-      // Parse the service account credentials
-      final accountCredentials = auth.ServiceAccountCredentials.fromJson(
-        jsonString,
-      );
-
-      // Define the required scope for Cloud Messaging (or use cloud-platform)
-      final scopes = ['https://www.googleapis.com/auth/cloud-platform'];
-
-      // Create an authenticated client
-      final client = await auth.clientViaServiceAccount(
-        accountCredentials,
-        scopes,
-      );
-
-      // Return the access token
-      return client.credentials.accessToken.data;
-    } catch (e) {
-      // Handle errors here
-      throw Exception("Failed to get access token: $e");
-    }
-  }
-  // send topicnotifcation with api
-
-  Future<void> sendTopicNotification({
-    required String title,
-    required String body,
-    required int productId,
-    required Map<String, String> data,
-  }) async {
-    try {
-      final accessToken = await getAccessToken();
-      final response = await Dio().post<dynamic>(
-        EnvVariable.instance.notifcationBaseUrl,
-        options: Options(
-          validateStatus: (_) => true,
-          contentType: Headers.jsonContentType,
-          responseType: ResponseType.json,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $accessToken',
-          },
-        ),
-        data: {
-          'message': {
-            'token': '/topics/$subscribeKey',
-            'notification': {'title': title, 'body': body},
-            'data': data, // Add custom data here
-
-            'android': {
-              'notification': {
-                "sound": "custom_sound",
-                'click_action':
-                    'FLUTTER_NOTIFICATION_CLICK', // Required for tapping to trigger response
-                'channel_id': 'high_importance_channel',
-              },
-            },
-            'apns': {
-              'payload': {
-                'aps': {"sound": "custom_sound.caf", 'content-available': 1},
-              },
-            },
-          },
-        },
-      );
-
-      debugPrint('Notification Created => ${response.data}');
-    } catch (e) {
-      debugPrint('Notification Error => $e');
-    }
-  }
-
-  //   Future<void> sendTopicNotification({
-  //     required String title,
-  //     required String body,
-  //     required int productId,
-  //   }) async {
-  //     try {
-  //       final response = await Dio().post<dynamic>(
-  //         EnvVariable.instance.notifcationBaseUrl,
-  //         options: Options(
-  //           validateStatus: (_) => true,
-  //           contentType: Headers.jsonContentType,
-  //           responseType: ResponseType.json,
-  //           headers: {
-  //             'Content-Type': 'application/json',
-  //             'Authorization': 'key=${EnvVariable.instance.firebaseKey}',
-  //           },
-  //         ),
-  //         data: {
-  //           'to': '/topics/$subscribeKey',
-  //           'notification': {'title': title, 'body': body},
-  //           'data': {'productId': productId},
-  //         },
-  //       );
-
-  //       debugPrint('Notification Created => ${response.data}');
-  //     } catch (e) {
-  //       debugPrint('Notification Error => $e');
-  //     }
-  //   }
 }

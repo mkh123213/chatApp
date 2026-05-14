@@ -48,4 +48,9 @@ abstract class MessagesRepo {
     required String chatId,
     required String currentUserId,
   });
+
+  Future<void> markMessagesByIdsAsRead({
+    required String chatId,
+    required List<String> messageIds,
+  });
 }

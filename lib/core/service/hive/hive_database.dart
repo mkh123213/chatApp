@@ -1,3 +1,6 @@
+// REUSABLE SERVICE: Works in any project.
+// REQUIRES: hive_ce_flutter package in pubspec.yaml
+// CHANGE: Register your own Hive adapters and open your own boxes in setup().
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 class HiveDatabase {

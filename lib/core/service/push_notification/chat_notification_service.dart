@@ -1,10 +1,14 @@
-import 'package:chat_material3/constants/fierstore_paths.dart';
-import 'package:chat_material3/core/app/env.variables.dart';
-import 'package:chat_material3/core/service/push_notification/firebase_cloud_messaging.dart';
+// REUSABLE SERVICE: Sends push notifications via Supabase Edge Function.
+// REQUIRES: supabase_flutter, cloud_firestore, firebase_messaging packages in pubspec.yaml
+// CHANGE: Update `usersCollection` import to your project's Firestore collection paths.
+// CHANGE: Update the Supabase Edge Function name ('send-notification') if different.
+// CHANGE: Update notification data fields (route, chatId, groupId) to match your app's navigation.
+// CHANGE: Add/remove send methods to match your project's notification types.
+import 'package:chat_material3/constants/fierstore_paths.dart'; // CHANGE: your collection paths
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChatNotificationService {
   ChatNotificationService._();
@@ -48,20 +52,23 @@ class ChatNotificationService {
       final data = receiverDoc.data();
       if (data == null) return;
 
+      final activeChatId = data['activeChatId'] as String? ?? '';
+      if (activeChatId == chatId) return;
+
       final fcmToken = data['fcmToken'] as String?;
       if (fcmToken == null || fcmToken.isEmpty) return;
 
       String body;
       switch (type) {
         case 'image':
-          body = '📷 Image';
+          body = 'Image';
         case 'file':
-          body = '📎 File';
+          body = 'File';
         default:
           body = message;
       }
 
-      await _sendToToken(
+      await _sendViaEdgeFunction(
         token: fcmToken,
         title: senderName,
         body: body,
@@ -89,10 +96,13 @@ class ChatNotificationService {
         final data = memberDoc.data();
         if (data == null) continue;
 
+        final activeGroupId = data['activeGroupId'] as String? ?? '';
+        if (activeGroupId == groupId) continue;
+
         final fcmToken = data['fcmToken'] as String?;
         if (fcmToken == null || fcmToken.isEmpty) continue;
 
-        await _sendToToken(
+        await _sendViaEdgeFunction(
           token: fcmToken,
           title: groupName,
           body: '$senderName: $message',
@@ -120,7 +130,7 @@ class ChatNotificationService {
       final fcmToken = data['fcmToken'] as String?;
       if (fcmToken == null || fcmToken.isEmpty) return;
 
-      await _sendDataOnly(
+      await _sendViaEdgeFunction(
         token: fcmToken,
         data: {
           'route': 'call',
@@ -129,90 +139,33 @@ class ChatNotificationService {
           'callerPhotoUrl': callerPhotoUrl,
           'callType': callType,
         },
+        dataOnly: true,
       );
     } catch (e) {
       debugPrint('Failed to send call notification: $e');
     }
   }
 
-  Future<void> _sendDataOnly({
+  Future<void> _sendViaEdgeFunction({
     required String token,
+    String? title,
+    String? body,
     required Map<String, String> data,
+    bool dataOnly = false,
   }) async {
     try {
-      final accessToken = await FirebaseCloudMessaging().getAccessToken();
-
-      await Dio().post<dynamic>(
-        EnvVariable.instance.notifcationBaseUrl,
-        options: Options(
-          validateStatus: (_) => true,
-          contentType: Headers.jsonContentType,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $accessToken',
-          },
-        ),
-        data: {
-          'message': {
-            'token': token,
-            'data': data,
-            'android': {
-              'priority': 'high',
-            },
-            'apns': {
-              'payload': {
-                'aps': {'content-available': 1},
-              },
-              'headers': {'apns-priority': '10'},
-            },
-          },
+      await Supabase.instance.client.functions.invoke(
+        'send-notification',
+        body: {
+          'token': token,
+          if (title != null) 'title': title,
+          if (body != null) 'body': body,
+          'data': data,
+          'dataOnly': dataOnly,
         },
       );
     } catch (e) {
-      debugPrint('FCM data-only send error: $e');
-    }
-  }
-
-  Future<void> _sendToToken({
-    required String token,
-    required String title,
-    required String body,
-    required Map<String, String> data,
-  }) async {
-    try {
-      final accessToken = await FirebaseCloudMessaging().getAccessToken();
-
-      await Dio().post<dynamic>(
-        EnvVariable.instance.notifcationBaseUrl,
-        options: Options(
-          validateStatus: (_) => true,
-          contentType: Headers.jsonContentType,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $accessToken',
-          },
-        ),
-        data: {
-          'message': {
-            'token': token,
-            'notification': {'title': title, 'body': body},
-            'data': data,
-            'android': {
-              'notification': {
-                'sound': 'default',
-                'channel_id': 'high_importance_channel',
-              },
-            },
-            'apns': {
-              'payload': {
-                'aps': {'sound': 'default', 'content-available': 1},
-              },
-            },
-          },
-        },
-      );
-    } catch (e) {
-      debugPrint('FCM send error: $e');
+      debugPrint('Edge function error: $e');
     }
   }
 }

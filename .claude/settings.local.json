@@ -66,7 +66,9 @@
       "Bash(where.exe /R \"C:\\\\ChatAppUiMaterial3-main\\\\.dart_tool\\\\package_config.json\" flutter_callkit_incoming)",
       "Bash(findstr callkit *)",
       "PowerShell(java *)",
-      "PowerShell(.specify/extensions/git/scripts/powershell/create-new-feature.ps1 -Json -ShortName \"signup-screen\" \"signup screen feature\")"
+      "PowerShell(.specify/extensions/git/scripts/powershell/create-new-feature.ps1 -Json -ShortName \"signup-screen\" \"signup screen feature\")",
+      "Bash(xargs grep -l \"get_it\\\\|GetIt\\\\|Provider\\\\|Singleton\")",
+      "Bash(grep -r \"class.*{$\" /c/ChatAppUiMaterial3-main/lib/core/app --include=\"*.dart\")"
     ]
   }
 }

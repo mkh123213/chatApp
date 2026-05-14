@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:chat_material3/constants/fierstore_paths.dart';
-import 'package:chat_material3/core/service/fierstore/firestore_service.dart';
-import 'package:chat_material3/core/service/supabase/supabase_storage_service.dart';
 import 'package:chat_material3/core/helper_functions/get_current_user.dart';
+import 'package:chat_material3/core/service/fierstore/firestore_service.dart';
 import 'package:chat_material3/core/service/push_notification/chat_notification_service.dart';
+import 'package:chat_material3/core/service/supabase/supabase_storage_service.dart';
 import 'package:chat_material3/features/single_chat/data/models/message_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -53,6 +53,11 @@ abstract class MessagesRemoteDataSource {
   Future<void> markMessagesAsRead({
     required String chatId,
     required String currentUserId,
+  });
+
+  Future<void> markMessagesByIdsAsRead({
+    required String chatId,
+    required List<String> messageIds,
   });
 }
 
@@ -313,6 +318,21 @@ class MessagesRemoteDataSourceImpl implements MessagesRemoteDataSource {
     final batch = FirebaseFirestore.instance.batch();
     for (final doc in snapshot.docs) {
       batch.update(doc.reference, {'isRead': true});
+    }
+    await batch.commit();
+  }
+
+  @override
+  Future<void> markMessagesByIdsAsRead({
+    required String chatId,
+    required List<String> messageIds,
+  }) async {
+    if (messageIds.isEmpty) return;
+    final batch = FirebaseFirestore.instance.batch();
+    final collectionRef = FirebaseFirestore.instance
+        .collection('$chatsCollection/$chatId/$messagesCollection');
+    for (final id in messageIds) {
+      batch.update(collectionRef.doc(id), {'isRead': true});
     }
     await batch.commit();
   }

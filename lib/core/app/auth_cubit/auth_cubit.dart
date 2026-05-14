@@ -10,7 +10,7 @@ import 'package:chat_material3/core/service/shared_pref/shared_pref.dart';
 import 'package:chat_material3/core/di/injection_container.dart';
 import 'package:chat_material3/core/utils/app_strings.dart';
 import 'package:chat_material3/core/service/push_notification/chat_notification_service.dart';
-import 'package:chat_material3/features/single_chat/data/services/user_presence_service.dart';
+import 'package:chat_material3/core/service/user_presence/user_presence_service.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'auth_state.dart';

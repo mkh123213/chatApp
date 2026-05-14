@@ -1,3 +1,5 @@
+// REUSABLE SERVICE: Works in any project as-is. No changes needed.
+// REQUIRES: shared_preferences package in pubspec.yaml
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPref {

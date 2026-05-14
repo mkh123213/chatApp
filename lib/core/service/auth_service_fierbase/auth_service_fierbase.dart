@@ -1,3 +1,6 @@
+// REUSABLE SERVICE: Firebase Auth + Google Sign-In wrapper.
+// REQUIRES: firebase_auth, google_sign_in packages in pubspec.yaml
+// CHANGE: Add/remove auth methods (e.g., Apple Sign-In, phone auth) as needed.
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
