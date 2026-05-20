@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  core_config:
+    path: packages/core_config
   flutter_svg:
   iconsax:
   freezed: ^3.2.5
@@ -85,6 +87,9 @@ dependencies:
   agora_rtc_engine: ^6.3.0
   flutter_callkit_incoming: ^2.0.4+1
   uuid: ^4.5.1
+  emoji_picker_flutter: ^4.4.0
+  flutter_contacts: ^2.0.2
+  share_plus: ^12.0.2
 
 dev_dependencies:
   flutter_test:

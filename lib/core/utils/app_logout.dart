@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:chat_material3/core/di/injection_container.dart';
 import 'package:chat_material3/core/extensions/context_extension.dart';
@@ -20,6 +21,8 @@ class AppLogout {
     final context = sl<GlobalKey<NavigatorState>>().currentState!.context;
 
     sl<UserPresenceService>().stop();
+
+    await FirebaseAuth.instance.signOut();
 
     await SharedPref().removePreference(PrefKeys.accessToken);
     await SharedPref().removePreference(PrefKeys.userId);

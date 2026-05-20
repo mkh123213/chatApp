@@ -44,6 +44,13 @@ class MainBottomNavBar extends StatelessWidget {
       icon: Assets.assetsSvgPhoneCall,
       navBarEnum: NavBarEnum.calls,
     ),
+    _NavBarItem(
+      title: sl<GlobalKey<NavigatorState>>()
+          .currentContext!
+          .translate(LangKeys.profile),
+      icon: Assets.assetsSvgProfileTabIcon,
+      navBarEnum: NavBarEnum.profile,
+    ),
   ];
 
   @override

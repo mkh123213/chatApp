@@ -24,6 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../groups/presentation/screens/groups_chat_screen.dart';
+import '../../../profile/presentation/screens/profile_screen.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
@@ -85,6 +86,8 @@ class MainScreen extends StatelessWidget {
                       );
                     } else if (cubit.navBarEnum == NavBarEnum.calls) {
                       return const CallsHistoryScreen();
+                    } else if (cubit.navBarEnum == NavBarEnum.profile) {
+                      return const ProfileScreen();
                     }
                     return const ChatHomeScreen();
                   },

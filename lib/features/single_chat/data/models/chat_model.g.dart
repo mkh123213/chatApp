@@ -12,6 +12,9 @@ ChatModel _$ChatModelFromJson(Map<String, dynamic> json) => ChatModel(
       usersEmails: (json['usersEmails'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
+      usersNames: (json['usersNames'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
       lastMessage: json['lastMessage'] as String?,
       lastMessageType: json['lastMessageType'] as String?,
       lastMessageTime: ChatModel._dateTimeFromJson(json['lastMessageTime']),
@@ -23,6 +26,7 @@ Map<String, dynamic> _$ChatModelToJson(ChatModel instance) => <String, dynamic>{
       'id': instance.id,
       'users': instance.users,
       'usersEmails': instance.usersEmails,
+      'usersNames': instance.usersNames,
       'lastMessage': instance.lastMessage,
       'lastMessageType': instance.lastMessageType,
       'lastMessageTime': ChatModel._dateTimeToJson(instance.lastMessageTime),

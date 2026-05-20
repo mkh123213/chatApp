@@ -21,6 +21,9 @@ import 'package:chat_material3/features/groups/presentation/widgets/media_links_
 import 'package:chat_material3/features/single_chat/presentation/bloc/create_chat_cubit/create_chat_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/bloc/get_chatss/chats_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/screens/chat_home_screen.dart';
+import 'package:chat_material3/features/single_chat/presentation/bloc/block_cubit/block_cubit.dart';
+import 'package:chat_material3/features/single_chat/presentation/screens/contact_info_screen.dart';
+import 'package:chat_material3/features/single_chat/presentation/screens/new_chat_screen.dart';
 import 'package:chat_material3/features/status/presentation/bloc/my_status_cubit/my_status_cubit.dart';
 import 'package:chat_material3/features/status/presentation/screens/status_screen.dart';
 import 'package:chat_material3/features/status/presentation/screens/status_viewer_screen.dart';
@@ -64,6 +67,8 @@ class AppRoutes {
   static const String statusViewer = 'statusViewer';
   static const String callScreen = 'callScreen';
   static const String callsHistoryScreen = 'callsHistoryScreen';
+  static const String newChat = 'newChat';
+  static const String contactInfo = 'contactInfo';
 
   static Route<void> onGenerateRoute(RouteSettings settings) {
     final args = settings.arguments;
@@ -191,17 +196,35 @@ class AppRoutes {
         return BaseRoute(
           page: const CallsHistoryScreen(),
         );
+
+      case newChat:
+        return BaseRoute(
+          page: const NewChatScreen(),
+        );
+      case contactInfo:
+        final map = args as Map<String, dynamic>;
+        return BaseRoute(
+          page: BlocProvider.value(
+            value: map['blockCubit'] as BlockCubit,
+            child: ContactInfoScreen(
+              chat: map['chat'] as ChatModel?,
+              friendDisplayName: map['friendDisplayName'] as String,
+              friendId: map['friendId'] as String,
+            ),
+          ),
+        );
       case groupInfo:
         return BaseRoute(
           page: GroupInfoScreen(
             group: args as GroupModel,
           ),
         );
-
-      // case mediaLinksDocs:
-      //   return BaseRoute(
-      //     page: const MediaLinksDocsScreen(groupId: ,),
-      //   );
+      case webview:
+        return BaseRoute(
+          page: CustomWebView(
+              url:
+                  'https://app.base44.com/apps/6a096bcfed54bde6a22d65ef/editor/preview'),
+        );
 
       default:
         return BaseRoute(page: const PageUnderBuildScreen());

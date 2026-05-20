@@ -9,6 +9,7 @@ class ChatModel {
     required this.id,
     required this.users,
     this.usersEmails,
+    this.usersNames,
     this.lastMessage,
     this.lastMessageType,
     this.lastMessageTime,
@@ -19,6 +20,7 @@ class ChatModel {
   final String id;
   final List<String> users;
   final List<String>? usersEmails;
+  final List<String>? usersNames;
   final String? lastMessage;
   final String? lastMessageType;
 

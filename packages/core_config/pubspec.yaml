@@ -1,0 +1,69 @@
+name: core_config
+description: Reusable Flutter core package — services, extensions, theme, widgets, and utilities.
+version: 1.0.0
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: '>=3.10.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Firebase
+  firebase_auth: '>=5.0.0'
+  cloud_firestore: '>=5.0.0'
+  firebase_messaging: '>=15.0.0'
+  google_sign_in: '>=6.0.0'
+
+  # Supabase
+  supabase_flutter: '>=2.0.0'
+
+  # Network
+  dio: '>=5.0.0'
+  retrofit: '>=4.0.0'
+  pretty_dio_logger: '>=1.0.0'
+
+  # State management
+  flutter_bloc: '>=8.0.0'
+  freezed_annotation: '>=2.0.0'
+  json_annotation: '>=4.0.0'
+  get_it: '>=7.0.0'
+
+  # Storage
+  shared_preferences: '>=2.0.0'
+  hive_ce_flutter: '>=2.0.0'
+
+  # UI
+  flutter_screenutil: '>=5.0.0'
+  fluttertoast: '>=8.0.0'
+  animate_do: '>=3.0.0'
+  shimmer: '>=3.0.0'
+  webview_flutter: '>=4.0.0'
+  flutter_svg: '>=2.0.0'
+
+  # Calls
+  agora_rtc_engine: '>=6.0.0'
+  flutter_callkit_incoming: '>=2.0.0'
+
+  # Utils
+  connectivity_plus: '>=6.0.0'
+  image_picker: '>=1.0.0'
+  permission_handler: '>=11.0.0'
+  url_launcher: '>=6.0.0'
+  package_info_plus: '>=8.0.0'
+  flutter_dotenv: '>=5.0.0'
+  path: '>=1.0.0'
+  flutter_local_notifications: '>=18.0.0'
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: '>=2.0.0'
+  freezed: '>=2.0.0'
+  json_serializable: '>=6.0.0'
+
+flutter:
+  uses-material-design: true

@@ -8,7 +8,9 @@ import 'package:chat_material3/features/single_chat/presentation/widgets/delete_
 import 'package:chat_material3/features/single_chat/presentation/widgets/edit_message_dialog.dart';
 import 'package:chat_material3/features/single_chat/presentation/widgets/file_message_widget.dart';
 import 'package:chat_material3/features/single_chat/presentation/widgets/image_message_widget.dart';
+import 'package:chat_material3/features/single_chat/presentation/widgets/voice_message_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
 class MessageBubble extends StatelessWidget {
@@ -26,6 +28,10 @@ class MessageBubble extends StatelessWidget {
     final isMe = message.senderId == getCurrentUser().uid;
     final timeText = DateFormat.jm().format(message.createdAt);
 
+    final bubbleColor = isMe
+        ? context.color.primary.withValues(alpha: 0.15)
+        : context.color.surfaceContainerHigh;
+
     return GestureDetector(
       onLongPress: isMe ? () => _showMessageActions(context) : null,
       child: Align(
@@ -34,52 +40,55 @@ class MessageBubble extends StatelessWidget {
           constraints: BoxConstraints(
             maxWidth: MediaQuery.sizeOf(context).width * 0.75,
           ),
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          child: Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(16),
-                topRight: const Radius.circular(16),
-                bottomLeft: Radius.circular(isMe ? 16 : 0),
-                bottomRight: Radius.circular(isMe ? 0 : 16),
-              ),
+          margin: EdgeInsets.symmetric(vertical: 3.h),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+          decoration: BoxDecoration(
+            color: bubbleColor,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16.r),
+              topRight: Radius.circular(16.r),
+              bottomLeft: Radius.circular(isMe ? 16.r : 4.r),
+              bottomRight: Radius.circular(isMe ? 4.r : 16.r),
             ),
-            color: isMe ? context.color.primary : context.color.tertiary,
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildMessageContent(context),
+              SizedBox(height: 4.h),
+              Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildMessageContent(context),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (message.isEdited) ...[
-                        TextApp(
-                            text: context.translate(LangKeys.edited),
-                            theme: context.textStyle),
-                        const SizedBox(width: 4),
-                      ],
-                      TextApp(
-                        text: timeText,
-                        theme: context.textStyle
-                            .copyWith(fontSize: 10, color: Colors.grey[600]),
+                  if (message.isEdited) ...[
+                    TextApp(
+                      text: context.translate(LangKeys.edited),
+                      theme: context.textStyle.copyWith(
+                        fontSize: 10.sp,
+                        color: context.color.onSurfaceVariant,
                       ),
-                      if (isMe) ...[
-                        const SizedBox(width: 4),
-                        MessageReadStatus(
-                          status: message.isRead
-                              ? ReadStatus.read
-                              : ReadStatus.delivered,
-                          size: 14,
-                        ),
-                      ],
-                    ],
+                    ),
+                    SizedBox(width: 4.w),
+                  ],
+                  TextApp(
+                    text: timeText,
+                    theme: context.textStyle.copyWith(
+                      fontSize: 10.sp,
+                      color: context.color.onSurfaceVariant,
+                    ),
                   ),
+                  if (isMe) ...[
+                    SizedBox(width: 4.w),
+                    MessageReadStatus(
+                      status: message.isRead
+                          ? ReadStatus.read
+                          : ReadStatus.delivered,
+                      size: 14,
+                      readColor: context.color.primary,
+                    ),
+                  ],
                 ],
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -87,15 +96,39 @@ class MessageBubble extends StatelessWidget {
   }
 
   Widget _buildMessageContent(BuildContext context) {
+    final isMe = message.senderId == getCurrentUser().uid;
     return switch (message.type) {
       'image' => ImageMessageWidget(mediaUrl: message.mediaUrl),
       'file' => FileMessageWidget(
           mediaUrl: message.mediaUrl,
           fileName: message.fileName,
         ),
+      'voice' => VoiceMessageWidget(
+          mediaUrl: message.mediaUrl,
+          durationSeconds: int.tryParse(message.text) ?? 0,
+          isMe: isMe,
+        ),
+      'sticker' => Center(
+          child: Text(
+            message.text,
+            style: const TextStyle(fontSize: 64),
+          ),
+        ),
+      'gif' => ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            message.mediaUrl,
+            width: 200,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+          ),
+        ),
       _ => TextApp(
           text: message.text,
-          theme: context.textStyle,
+          theme: context.textStyle.copyWith(
+            fontSize: 15.sp,
+            color: context.color.onSurface,
+          ),
         ),
     };
   }

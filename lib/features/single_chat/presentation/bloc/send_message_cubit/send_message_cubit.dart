@@ -92,6 +92,80 @@ class SendMessageCubit extends Cubit<SendMessageState> {
     }
   }
 
+  Future<void> sendVoiceMessage({
+    required ChatModel chat,
+    required File voiceFile,
+    required Duration duration,
+  }) async {
+    emit(const SendMessageSending());
+    try {
+      final currentUser = getCurrentUser();
+      final receiverId = chat.users.firstWhere(
+        (uid) => uid != currentUser.uid,
+        orElse: () => '',
+      );
+      await _messagesRepo.sendVoiceMessage(
+        chatId: chat.id,
+        senderId: currentUser.uid,
+        senderEmail: currentUser.email ?? '',
+        receiverId: receiverId,
+        voiceFile: voiceFile,
+        duration: duration,
+      );
+      emit(const SendMessageSent());
+    } catch (e) {
+      emit(SendMessageError(message: e.toString()));
+    }
+  }
+
+  Future<void> sendStickerMessage({
+    required ChatModel chat,
+    required String sticker,
+  }) async {
+    emit(const SendMessageSending());
+    try {
+      final currentUser = getCurrentUser();
+      final receiverId = chat.users.firstWhere(
+        (uid) => uid != currentUser.uid,
+        orElse: () => '',
+      );
+      await _messagesRepo.sendStickerMessage(
+        chatId: chat.id,
+        senderId: currentUser.uid,
+        senderEmail: currentUser.email ?? '',
+        receiverId: receiverId,
+        sticker: sticker,
+      );
+      emit(const SendMessageSent());
+    } catch (e) {
+      emit(SendMessageError(message: e.toString()));
+    }
+  }
+
+  Future<void> sendGifMessage({
+    required ChatModel chat,
+    required String gifUrl,
+  }) async {
+    emit(const SendMessageSending());
+    try {
+      final currentUser = getCurrentUser();
+      final receiverId = chat.users.firstWhere(
+        (uid) => uid != currentUser.uid,
+        orElse: () => '',
+      );
+      await _messagesRepo.sendGifMessage(
+        chatId: chat.id,
+        senderId: currentUser.uid,
+        senderEmail: currentUser.email ?? '',
+        receiverId: receiverId,
+        gifUrl: gifUrl,
+      );
+      emit(const SendMessageSent());
+    } catch (e) {
+      emit(SendMessageError(message: e.toString()));
+    }
+  }
+
   Future<void> updateMessage({
     required String chatId,
     required String messageId,

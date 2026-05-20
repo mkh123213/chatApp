@@ -32,24 +32,32 @@ class MessagesListView extends StatelessWidget {
                 final msg = messages[index];
                 final isMe = msg.senderId == getCurrentUser().uid;
                 final cubit = context.read<MessagesCubit>();
-                return ChatMessageBubble(
-                  text: msg.text,
-                  messageType: _mapType(msg.type),
-                  isMe: isMe,
-                  time: DateFormat.jm().format(msg.createdAt),
-                  mediaUrl: msg.mediaUrl,
-                  fileName: msg.fileName,
-                  isEdited: msg.isEdited,
-                  isSelected: selectedIds.contains(msg.id),
-                  onImageTap: msg.type == 'image' && msg.mediaUrl.isNotEmpty
-                      ? () => openChatImageViewer(context, msg.mediaUrl)
-                      : null,
-                  onLongPress: isMe
+                final inSelectionMode = selectedIds.isNotEmpty;
+                return GestureDetector(
+                  onTap: inSelectionMode
                       ? () => cubit.toggleMessageSelection(msg.id)
                       : null,
-                  readStatus: isMe
-                      ? (msg.isRead ? ReadStatus.read : ReadStatus.delivered)
-                      : null,
+                  child: ChatMessageBubble(
+                    text: msg.text,
+                    messageType: _mapType(msg.type),
+                    isMe: isMe,
+                    time: DateFormat.jm().format(msg.createdAt),
+                    mediaUrl: msg.mediaUrl,
+                    fileName: msg.fileName,
+                    isEdited: msg.isEdited,
+                    isSelected: selectedIds.contains(msg.id),
+                    onImageTap: !inSelectionMode &&
+                            msg.type == 'image' &&
+                            msg.mediaUrl.isNotEmpty
+                        ? () => openChatImageViewer(context, msg.mediaUrl)
+                        : null,
+                    onLongPress: isMe
+                        ? () => cubit.toggleMessageSelection(msg.id)
+                        : null,
+                    readStatus: isMe
+                        ? (msg.isRead ? ReadStatus.read : ReadStatus.delivered)
+                        : null,
+                  ),
                 );
               },
             ),
@@ -69,6 +77,9 @@ class MessagesListView extends StatelessWidget {
     return switch (type) {
       'image' => ChatMessageType.image,
       'file' => ChatMessageType.file,
+      'voice' => ChatMessageType.voice,
+      'sticker' => ChatMessageType.sticker,
+      'gif' => ChatMessageType.gif,
       _ => ChatMessageType.text,
     };
   }

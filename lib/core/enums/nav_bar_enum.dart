@@ -1,1 +1,1 @@
-enum NavBarEnum { singleChats, groups, status, calls }
+enum NavBarEnum { singleChats, groups, status, calls, profile }

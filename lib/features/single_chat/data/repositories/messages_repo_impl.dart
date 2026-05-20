@@ -74,6 +74,59 @@ class MessagesRepoImpl implements MessagesRepo {
   }
 
   @override
+  Future<void> sendVoiceMessage({
+    required String chatId,
+    required String senderId,
+    required String senderEmail,
+    required String receiverId,
+    required File voiceFile,
+    required Duration duration,
+  }) {
+    return _messagesRemoteDataSource.sendVoiceMessage(
+      chatId: chatId,
+      senderId: senderId,
+      senderEmail: senderEmail,
+      receiverId: receiverId,
+      voiceFile: voiceFile,
+      duration: duration,
+    );
+  }
+
+  @override
+  Future<void> sendStickerMessage({
+    required String chatId,
+    required String senderId,
+    required String senderEmail,
+    required String receiverId,
+    required String sticker,
+  }) {
+    return _messagesRemoteDataSource.sendStickerMessage(
+      chatId: chatId,
+      senderId: senderId,
+      senderEmail: senderEmail,
+      receiverId: receiverId,
+      sticker: sticker,
+    );
+  }
+
+  @override
+  Future<void> sendGifMessage({
+    required String chatId,
+    required String senderId,
+    required String senderEmail,
+    required String receiverId,
+    required String gifUrl,
+  }) {
+    return _messagesRemoteDataSource.sendGifMessage(
+      chatId: chatId,
+      senderId: senderId,
+      senderEmail: senderEmail,
+      receiverId: receiverId,
+      gifUrl: gifUrl,
+    );
+  }
+
+  @override
   Future<void> updateMessage({
     required String chatId,
     required String messageId,

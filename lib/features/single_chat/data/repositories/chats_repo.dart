@@ -10,6 +10,8 @@ abstract class ChatsRepo {
     required String friendEmail,
   });
 
+  Future<void> deleteChat({required String chatId});
+
   Stream<List<ChatModel>> searchChats({
     required String currentUserId,
     required String searchText,
@@ -39,6 +41,11 @@ class ChatsRepoImpl implements ChatsRepo {
       currentUserEmail: currentUserEmail,
       friendEmail: friendEmail,
     );
+  }
+
+  @override
+  Future<void> deleteChat({required String chatId}) {
+    return _chatsRemoteDataSource.deleteChat(chatId: chatId);
   }
 
   @override

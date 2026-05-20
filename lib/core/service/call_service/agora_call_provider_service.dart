@@ -10,7 +10,8 @@ import 'package:chat_material3/core/service/call_service/call_provider_service.d
 class AgoraCallProviderService implements CallProviderService {
   RtcEngine? _engine;
   int? _remoteUid;
-  final _remoteUidController = StreamController<int?>.broadcast();
+  bool _joined = false;
+  StreamController<int?> _remoteUidController = StreamController<int?>.broadcast();
 
   @override
   RtcEngine? get engine => _engine;
@@ -23,6 +24,12 @@ class AgoraCallProviderService implements CallProviderService {
 
   @override
   Future<void> initialize() async {
+    if (_remoteUidController.isClosed) {
+      _remoteUidController = StreamController<int?>.broadcast();
+    }
+    _joined = false;
+    _remoteUid = null;
+
     _engine = createAgoraRtcEngine();
     await _engine!.initialize(const RtcEngineContext(
       appId: agoraAppId,
@@ -31,6 +38,14 @@ class AgoraCallProviderService implements CallProviderService {
 
     _engine!.registerEventHandler(
       RtcEngineEventHandler(
+        onJoinChannelSuccess: (connection, elapsed) {
+          _joined = true;
+        },
+        onError: (err, msg) {
+          // Token expired or invalid — triggers ErrorCodeType.errTokenExpired
+          // or ErrorCodeType.errInvalidToken
+          _joined = false;
+        },
         onUserJoined: (connection, remoteUid, elapsed) {
           _remoteUid = remoteUid;
           _remoteUidController.add(remoteUid);
@@ -104,6 +119,6 @@ class AgoraCallProviderService implements CallProviderService {
     await _engine?.release();
     _engine = null;
     _remoteUid = null;
-    await _remoteUidController.close();
+    _joined = false;
   }
 }

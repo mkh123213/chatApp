@@ -68,7 +68,18 @@
       "PowerShell(java *)",
       "PowerShell(.specify/extensions/git/scripts/powershell/create-new-feature.ps1 -Json -ShortName \"signup-screen\" \"signup screen feature\")",
       "Bash(xargs grep -l \"get_it\\\\|GetIt\\\\|Provider\\\\|Singleton\")",
-      "Bash(grep -r \"class.*{$\" /c/ChatAppUiMaterial3-main/lib/core/app --include=\"*.dart\")"
+      "Bash(grep -r \"class.*{$\" /c/ChatAppUiMaterial3-main/lib/core/app --include=\"*.dart\")",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\ChatAppUiMaterial3-main\\\\lib\\\\core\" -Recurse -Directory | Select-Object -ExpandProperty FullName | ForEach-Object { $_ -replace [regex]::Escape\\(\"C:\\\\ChatAppUiMaterial3-main\"\\), \"\" } | Sort-Object)",
+      "Bash(Get-ChildItem -Path \"C:\\\\ChatAppUiMaterial3-main\" -Recurse -Filter \"*call*\" -Directory)",
+      "Bash(Get-Content \"C:\\\\ChatAppUiMaterial3-main\\\\pubspec.yaml\")",
+      "Bash(Get-Content *)",
+      "mcp__claude_ai_Base44__list_user_apps",
+      "mcp__claude_ai_Base44__list_entity_schemas",
+      "mcp__claude_ai_Base44__get_app_preview_url",
+      "mcp__claude_ai_Base44__get_app_status",
+      "WebFetch(domain:preview-sandbox--6a0d4f69dbb23bf76360e832.base44.app)",
+      "Bash(grep -i \"\\\\.dart$\")",
+      "Bash(Select-Object -Last 20)"
     ]
   }
 }

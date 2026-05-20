@@ -1,6 +1,3 @@
-/// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
 function base64url(data: Uint8Array): string {
   return btoa(String.fromCharCode(...data))
     .replace(/\+/g, "-")
@@ -14,14 +11,15 @@ function base64urlEncode(str: string): string {
 
 async function getAccessToken(): Promise<string> {
   const clientEmail = Deno.env.get("FCM_CLIENT_EMAIL")!;
-  const privateKeyPem = Deno.env.get("FCM_PRIVATE_KEY")!.replace(/\\n/g, "\n");
+  const rawKey = Deno.env.get("FCM_PRIVATE_KEY")!;
+  const privateKeyPem = rawKey.replace(/\\n/g, "\n");
   const now = Math.floor(Date.now() / 1000);
 
   const header = base64urlEncode(JSON.stringify({ alg: "RS256", typ: "JWT" }));
   const payload = base64urlEncode(
     JSON.stringify({
       iss: clientEmail,
-      scope: "https://www.googleapis.com/auth/cloud-platform",
+      scope: "https://www.googleapis.com/auth/firebase.messaging",
       aud: "https://oauth2.googleapis.com/token",
       iat: now,
       exp: now + 3600,
@@ -29,8 +27,8 @@ async function getAccessToken(): Promise<string> {
   );
 
   const pemBody = privateKeyPem
-    .replace("-----BEGIN PRIVATE KEY-----", "")
-    .replace("-----END PRIVATE KEY-----", "")
+    .replace(/-----BEGIN PRIVATE KEY-----/, "")
+    .replace(/-----END PRIVATE KEY-----/, "")
     .replace(/\s/g, "");
   const keyBytes = Uint8Array.from(atob(pemBody), (c) => c.charCodeAt(0));
 
@@ -65,7 +63,7 @@ async function getAccessToken(): Promise<string> {
   return tokenData.access_token;
 }
 
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
   }

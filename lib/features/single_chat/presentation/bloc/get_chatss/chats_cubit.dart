@@ -67,13 +67,24 @@ class ChatsCubit extends Cubit<ChatsState> {
     final filteredChats = _allChats.where((chat) {
       final usersEmails =
           chat.usersEmails?.map((e) => e.toLowerCase()).toList() ?? [];
-      return usersEmails.any((email) => email.contains(cleanedSearchText));
+      final usersNames =
+          chat.usersNames?.map((n) => n.toLowerCase()).toList() ?? [];
+      return usersEmails.any((email) => email.contains(cleanedSearchText)) ||
+          usersNames.any((name) => name.contains(cleanedSearchText));
     }).toList();
 
     if (filteredChats.isEmpty) {
       emit(const ChatsSearchEmpty());
     } else {
       emit(ChatsSearchLoaded(chats: filteredChats));
+    }
+  }
+
+  Future<void> deleteChat({required String chatId}) async {
+    try {
+      await _chatsRepo.deleteChat(chatId: chatId);
+    } catch (e) {
+      emit(ChatsError(message: e.toString()));
     }
   }
 

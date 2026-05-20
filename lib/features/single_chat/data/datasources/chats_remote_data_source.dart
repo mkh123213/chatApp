@@ -1,6 +1,8 @@
 import 'package:chat_material3/constants/fierstore_paths.dart';
+import 'package:chat_material3/core/helper_functions/get_current_user.dart';
 import 'package:chat_material3/core/service/fierstore/firestore_service.dart';
 import 'package:chat_material3/features/single_chat/data/models/chat_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class ChatsRemoteDataSource {
   Stream<List<ChatModel>> getChats({required String currentUserId});
@@ -10,6 +12,8 @@ abstract class ChatsRemoteDataSource {
     required String currentUserEmail,
     required String friendEmail,
   });
+
+  Future<void> deleteChat({required String chatId});
 
   Stream<List<ChatModel>> searchChats({
     required String currentUserId,
@@ -69,6 +73,7 @@ class ChatsRemoteDataSourceImpl implements ChatsRemoteDataSource {
     final friendId = friendData['id'] as String;
     final friendUserEmail =
         friendData['email'] as String? ?? cleanedFriendEmail;
+    final friendName = friendData['name'] as String? ?? '';
 
     final existingChats =
         await _dataBaseService.getCollection<Map<String, dynamic>>(
@@ -90,10 +95,13 @@ class ChatsRemoteDataSourceImpl implements ChatsRemoteDataSource {
       friendId: friendId,
     );
 
+    final currentUserName = getCurrentUser().name ?? '';
+
     final chatToAdd = ChatModel(
       id: chatId,
       users: [currentUserId, friendId],
       usersEmails: [cleanedCurrentEmail, friendUserEmail],
+      usersNames: [currentUserName, friendName],
       lastMessage: '',
       lastMessageTime: null,
       createdAt: DateTime.now(),
@@ -103,6 +111,21 @@ class ChatsRemoteDataSourceImpl implements ChatsRemoteDataSource {
       path: '$chatsCollection/$chatId',
       data: chatToAdd.toJson(),
     );
+  }
+
+  @override
+  Future<void> deleteChat({required String chatId}) async {
+    final messagesSnapshot = await FirebaseFirestore.instance
+        .collection('$chatsCollection/$chatId/$messagesCollection')
+        .get();
+
+    final batch = FirebaseFirestore.instance.batch();
+    for (final doc in messagesSnapshot.docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
+
+    await _dataBaseService.deleteData(path: '$chatsCollection/$chatId');
   }
 
   @override

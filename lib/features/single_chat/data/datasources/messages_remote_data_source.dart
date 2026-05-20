@@ -38,6 +38,31 @@ abstract class MessagesRemoteDataSource {
     String caption = '',
   });
 
+  Future<void> sendVoiceMessage({
+    required String chatId,
+    required String senderId,
+    required String senderEmail,
+    required String receiverId,
+    required File voiceFile,
+    required Duration duration,
+  });
+
+  Future<void> sendStickerMessage({
+    required String chatId,
+    required String senderId,
+    required String senderEmail,
+    required String receiverId,
+    required String sticker,
+  });
+
+  Future<void> sendGifMessage({
+    required String chatId,
+    required String senderId,
+    required String senderEmail,
+    required String receiverId,
+    required String gifUrl,
+  });
+
   Future<void> updateMessage({
     required String chatId,
     required String messageId,
@@ -255,6 +280,172 @@ class MessagesRemoteDataSourceImpl implements MessagesRemoteDataSource {
   }
 
   @override
+  Future<void> sendVoiceMessage({
+    required String chatId,
+    required String senderId,
+    required String senderEmail,
+    required String receiverId,
+    required File voiceFile,
+    required Duration duration,
+  }) async {
+    final result = await _storageService.uploadChatFile(
+      chatId: chatId,
+      file: voiceFile,
+      originalFileName: 'voice_${DateTime.now().millisecondsSinceEpoch}.m4a',
+    );
+
+    final now = DateTime.now();
+    final messageId = FirebaseFirestore.instance
+        .collection(chatsCollection)
+        .doc(chatId)
+        .collection(messagesCollection)
+        .doc()
+        .id;
+
+    final message = MessageModel(
+      id: messageId,
+      chatId: chatId,
+      senderId: senderId,
+      senderEmail: senderEmail,
+      receiverId: receiverId,
+      text: '${duration.inSeconds}',
+      type: 'voice',
+      mediaUrl: result.url,
+      storagePath: result.storagePath,
+      fileName: result.fileName,
+      createdAt: now,
+      updatedAt: now,
+      isEdited: false,
+    );
+
+    await _dataBaseService.setData(
+      path: '$chatsCollection/$chatId/$messagesCollection/$messageId',
+      data: message.toJson(),
+    );
+
+    await _updateChatLastMessage(
+      chatId: chatId,
+      lastMessage: 'Voice message',
+      lastMessageType: 'voice',
+      time: now,
+    );
+
+    ChatNotificationService.instance.sendMessageNotification(
+      receiverId: receiverId,
+      chatId: chatId,
+      senderName: getCurrentUser().name ?? senderEmail,
+      message: 'Voice message',
+      type: 'voice',
+    );
+  }
+
+  @override
+  Future<void> sendStickerMessage({
+    required String chatId,
+    required String senderId,
+    required String senderEmail,
+    required String receiverId,
+    required String sticker,
+  }) async {
+    final now = DateTime.now();
+    final messageId = FirebaseFirestore.instance
+        .collection(chatsCollection)
+        .doc(chatId)
+        .collection(messagesCollection)
+        .doc()
+        .id;
+
+    final message = MessageModel(
+      id: messageId,
+      chatId: chatId,
+      senderId: senderId,
+      senderEmail: senderEmail,
+      receiverId: receiverId,
+      text: sticker,
+      type: 'sticker',
+      mediaUrl: '',
+      storagePath: '',
+      fileName: '',
+      createdAt: now,
+      updatedAt: now,
+      isEdited: false,
+    );
+
+    await _dataBaseService.setData(
+      path: '$chatsCollection/$chatId/$messagesCollection/$messageId',
+      data: message.toJson(),
+    );
+
+    await _updateChatLastMessage(
+      chatId: chatId,
+      lastMessage: 'Sticker',
+      lastMessageType: 'sticker',
+      time: now,
+    );
+
+    ChatNotificationService.instance.sendMessageNotification(
+      receiverId: receiverId,
+      chatId: chatId,
+      senderName: getCurrentUser().name ?? senderEmail,
+      message: 'Sticker',
+      type: 'sticker',
+    );
+  }
+
+  @override
+  Future<void> sendGifMessage({
+    required String chatId,
+    required String senderId,
+    required String senderEmail,
+    required String receiverId,
+    required String gifUrl,
+  }) async {
+    final now = DateTime.now();
+    final messageId = FirebaseFirestore.instance
+        .collection(chatsCollection)
+        .doc(chatId)
+        .collection(messagesCollection)
+        .doc()
+        .id;
+
+    final message = MessageModel(
+      id: messageId,
+      chatId: chatId,
+      senderId: senderId,
+      senderEmail: senderEmail,
+      receiverId: receiverId,
+      text: '',
+      type: 'gif',
+      mediaUrl: gifUrl,
+      storagePath: '',
+      fileName: '',
+      createdAt: now,
+      updatedAt: now,
+      isEdited: false,
+    );
+
+    await _dataBaseService.setData(
+      path: '$chatsCollection/$chatId/$messagesCollection/$messageId',
+      data: message.toJson(),
+    );
+
+    await _updateChatLastMessage(
+      chatId: chatId,
+      lastMessage: 'GIF',
+      lastMessageType: 'gif',
+      time: now,
+    );
+
+    ChatNotificationService.instance.sendMessageNotification(
+      receiverId: receiverId,
+      chatId: chatId,
+      senderName: getCurrentUser().name ?? senderEmail,
+      message: 'GIF',
+      type: 'gif',
+    );
+  }
+
+  @override
   Future<void> updateMessage({
     required String chatId,
     required String messageId,
@@ -283,6 +474,51 @@ class MessagesRemoteDataSourceImpl implements MessagesRemoteDataSource {
 
     if (storagePath.isNotEmpty) {
       await _storageService.removeFile(storagePath: storagePath);
+    }
+
+    // Update lastMessage to the most recent remaining message
+    final remaining = await FirebaseFirestore.instance
+        .collection('$chatsCollection/$chatId/$messagesCollection')
+        .orderBy('createdAt', descending: true)
+        .limit(1)
+        .get();
+
+    if (remaining.docs.isEmpty) {
+      await _updateChatLastMessage(
+        chatId: chatId,
+        lastMessage: '',
+        lastMessageType: 'text',
+        time: DateTime.now(),
+      );
+    } else {
+      final lastMsg = remaining.docs.first.data();
+      final type = lastMsg['type'] as String? ?? 'text';
+      String displayText;
+      switch (type) {
+        case 'image':
+          displayText = 'Image';
+          break;
+        case 'file':
+          displayText = lastMsg['fileName'] as String? ?? 'File';
+          break;
+        case 'voice':
+          displayText = 'Voice message';
+          break;
+        case 'sticker':
+          displayText = 'Sticker';
+          break;
+        case 'gif':
+          displayText = 'GIF';
+          break;
+        default:
+          displayText = lastMsg['text'] as String? ?? '';
+      }
+      await _updateChatLastMessage(
+        chatId: chatId,
+        lastMessage: displayText,
+        lastMessageType: type,
+        time: (lastMsg['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      );
     }
   }
 
