@@ -250,4 +250,17 @@ class LangKeys {
   static const String mediaLinksAndDocs = 'media_links_and_docs';
   static const String muteNotificationsSubtitle = 'mute_notifications_subtitle';
   static const String encryptionSubtitle = 'encryption_subtitle';
+
+  static const String profileAndSettings = 'profile_and_settings';
+  static const String privacyAndSecurity = 'privacy_and_security';
+  static const String appearance = 'appearance';
+  static const String doNotDisturb = 'do_not_disturb';
+  static const String off = 'off';
+  static const String change = 'change';
+  static const String disappearingMessages = 'disappearing_messages';
+  static const String blockedContacts = 'blocked_contacts';
+  static const String blockedCount = 'blocked_count';
+  static const String lightMode = 'light_mode';
+  static const String defaultWallpaper = 'default_wallpaper';
+  static const String aboutStatus = 'about_status';
 }

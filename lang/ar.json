@@ -216,5 +216,17 @@
     "contact_info": "معلومات جهة الاتصال",
     "media_links_and_docs": "الوسائط والروابط والمستندات",
     "mute_notifications_subtitle": "كتم إشعارات هذه المحادثة",
-    "encryption_subtitle": "الرسائل مشفرة من طرف إلى طرف"
+    "encryption_subtitle": "الرسائل مشفرة من طرف إلى طرف",
+    "profile_and_settings": "الملف الشخصي والإعدادات",
+    "privacy_and_security": "الخصوصية والأمان",
+    "appearance": "المظهر",
+    "do_not_disturb": "عدم الإزعاج",
+    "off": "مغلق",
+    "change": "تغيير",
+    "disappearing_messages": "الرسائل المختفية (عام)",
+    "blocked_contacts": "جهات الاتصال المحظورة",
+    "blocked_count": "محظور",
+    "light_mode": "الوضع الفاتح",
+    "default_wallpaper": "الخلفية الافتراضية",
+    "about_status": "مرحباً! أنا أستخدم ChatApp 👋"
 }

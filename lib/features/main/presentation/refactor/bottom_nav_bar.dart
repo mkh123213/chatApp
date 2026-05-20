@@ -82,17 +82,18 @@ class MainBottomNavBar extends StatelessWidget {
                 final cubit = context.read<MainCubit>();
 
                 return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: _items.map((item) {
                     final bool isSelected = cubit.navBarEnum == item.navBarEnum;
 
-                    return _MainBottomNavItem(
-                      title: item.title ?? '',
-                      icon: item.icon,
-                      isSelected: isSelected,
-                      onTap: () {
-                        cubit.selectedNavBarIcons(item.navBarEnum);
-                      },
+                    return Expanded(
+                      child: _MainBottomNavItem(
+                        title: item.title ?? '',
+                        icon: item.icon,
+                        isSelected: isSelected,
+                        onTap: () {
+                          cubit.selectedNavBarIcons(item.navBarEnum);
+                        },
+                      ),
                     );
                   }).toList(),
                 );
@@ -134,7 +135,7 @@ class _MainBottomNavItem extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
           padding: EdgeInsets.symmetric(
-            horizontal: isSelected ? 20.w : 14.w,
+            horizontal: isSelected ? 12.w : 8.w,
             vertical: 6.h,
           ),
           decoration: BoxDecoration(

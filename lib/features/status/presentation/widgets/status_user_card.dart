@@ -1,97 +1,84 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chat_material3/core/common/widgets/text_app.dart';
 import 'package:chat_material3/core/extensions/context_extension.dart';
 import 'package:chat_material3/core/routes/app_routes.dart';
-import 'package:chat_material3/core/style/fonts/font_weight_helper.dart';
 import 'package:chat_material3/features/status/data/models/status_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class StatusUserCard extends StatelessWidget {
-  const StatusUserCard(
-      {required this.status, required this.isViewed, super.key});
+  const StatusUserCard({
+    required this.statuses,
+    required this.isViewed,
+    super.key,
+  });
 
-  final StatusModel status;
+  final List<StatusModel> statuses;
   final bool isViewed;
 
   @override
   Widget build(BuildContext context) {
+    final first = statuses.first;
     final displayName =
-        status.userName.isNotEmpty ? status.userName : status.userEmail;
-    final timeAgo = _relativeTime(status.createdAt);
+        first.userName.isNotEmpty ? first.userName : first.userEmail;
+    final count = statuses.length;
+    final latestTime = first.createdAt;
+    final timeAgo = latestTime != null ? _relativeTime(latestTime) : '';
+    final subtitle =
+        '$count ${count == 1 ? 'update' : 'updates'}${timeAgo.isNotEmpty ? ' · $timeAgo' : ''}';
 
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6.h),
-      child: GestureDetector(
-        onTap: () => context.pushName(
-          AppRoutes.statusViewer,
-          arguments: {
-            'statuses': [status],
-            'initialIndex': 0,
-            'isOwn': false,
-          },
+    return ListTile(
+      contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+      leading: _StatusAvatar(
+        photoUrl: first.userPhotoUrl,
+        name: displayName,
+        isViewed: isViewed,
+      ),
+      title: Text(
+        displayName,
+        style: TextStyle(
+          fontSize: 15.sp,
+          fontWeight: FontWeight.w600,
+          color: isViewed
+              ? context.color.onSurface.withValues(alpha: 0.5)
+              : context.color.onSurface,
         ),
-        child: Row(
-          children: [
-            _StatusAvatar(
-              photoUrl: status.userPhotoUrl,
-              name: displayName,
-              isViewed: isViewed,
-            ),
-            SizedBox(width: 14.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextApp(
-                    text: displayName,
-                    theme: context.textStyle.copyWith(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeightHelper.semiBold,
-                      color: isViewed
-                          ? context.color.onSurface.withValues(alpha: 0.5)
-                          : context.color.onSurface,
-                    ),
-                    maxLines: 1,
-                    textOverflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 2.h),
-                  TextApp(
-                    text: timeAgo,
-                    theme: context.textStyle.copyWith(
-                      fontSize: 12.sp,
-                      color: context.color.onSurface
-                          .withValues(alpha: isViewed ? 0.35 : 0.55),
-                    ),
-                  ),
-                ],
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          fontSize: 13.sp,
+          color: context.color.onSurfaceVariant,
+        ),
+      ),
+      trailing: !isViewed
+          ? Container(
+              width: 12.w,
+              height: 12.w,
+              decoration: BoxDecoration(
+                color: context.color.primary,
+                shape: BoxShape.circle,
               ),
-            ),
-          ],
-        ),
+            )
+          : null,
+      onTap: () => context.pushName(
+        AppRoutes.statusViewer,
+        arguments: {
+          'statuses': statuses,
+          'initialIndex': 0,
+          'isOwn': false,
+        },
       ),
     );
   }
 
-  String _relativeTime(DateTime? time) {
-    if (time == null) return '';
+  String _relativeTime(DateTime time) {
     final diff = DateTime.now().difference(time);
     if (diff.inMinutes < 1) return 'just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes} minutes ago';
-    if (diff.inHours < 24) return '${diff.inHours} hours ago';
-    final d = time;
-    final now = DateTime.now();
-    if (d.day == now.day) return 'Today, ${_hhmm(d)}';
-    final yesterday = now.subtract(const Duration(days: 1));
-    if (d.day == yesterday.day) return 'Yesterday, ${_hhmm(d)}';
-    return '${d.month}/${d.day}, ${_hhmm(d)}';
-  }
-
-  String _hhmm(DateTime t) {
-    final h = t.hour % 12 == 0 ? 12 : t.hour % 12;
-    final m = t.minute.toString().padLeft(2, '0');
-    final period = t.hour < 12 ? 'AM' : 'PM';
-    return '$h:$m $period';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    return '${diff.inDays}d ago';
   }
 }
 
@@ -109,8 +96,8 @@ class _StatusAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 56.w,
-      height: 56.w,
+      width: 52.w,
+      height: 52.w,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: isViewed
@@ -147,12 +134,12 @@ class _Initials extends StatelessWidget {
           ? context.color.onSurface.withValues(alpha: 0.2)
           : context.color.primary,
       alignment: Alignment.center,
-      child: TextApp(
-        text: initial,
-        theme: context.textStyle.copyWith(
+      child: Text(
+        initial,
+        style: TextStyle(
           fontSize: 20.sp,
           color: Colors.white,
-          fontWeight: FontWeightHelper.bold,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

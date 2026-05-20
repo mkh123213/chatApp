@@ -216,5 +216,17 @@
     "contact_info": "Contact Info",
     "media_links_and_docs": "Media, Links, and Docs",
     "mute_notifications_subtitle": "Mute notifications from this chat",
-    "encryption_subtitle": "Messages are end-to-end encrypted"
+    "encryption_subtitle": "Messages are end-to-end encrypted",
+    "profile_and_settings": "Profile & Settings",
+    "privacy_and_security": "Privacy & Security",
+    "appearance": "Appearance",
+    "do_not_disturb": "Do Not Disturb",
+    "off": "Off",
+    "change": "Change",
+    "disappearing_messages": "Disappearing messages (global)",
+    "blocked_contacts": "Blocked contacts",
+    "blocked_count": "blocked",
+    "light_mode": "Light mode",
+    "default_wallpaper": "Default wallpaper",
+    "about_status": "Hey there! I am using ChatApp 👋"
 }
