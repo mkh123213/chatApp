@@ -15,6 +15,8 @@ class ChatModel {
     this.lastMessageTime,
     this.createdAt,
     this.updatedAt,
+    this.pinnedBy,
+    this.archivedBy,
   });
 
   final String id;
@@ -23,6 +25,8 @@ class ChatModel {
   final List<String>? usersNames;
   final String? lastMessage;
   final String? lastMessageType;
+  final List<String>? pinnedBy;
+  final List<String>? archivedBy;
 
   @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
   final DateTime? lastMessageTime;

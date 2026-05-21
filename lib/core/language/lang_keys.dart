@@ -263,4 +263,30 @@ class LangKeys {
   static const String lightMode = 'light_mode';
   static const String defaultWallpaper = 'default_wallpaper';
   static const String aboutStatus = 'about_status';
+
+  // Pinned & Archived chats
+  static const String pinned = 'pinned';
+  static const String archived = 'archived';
+  static const String pinChat = 'pin_chat';
+  static const String unpinChat = 'unpin_chat';
+  static const String archiveChat = 'archive_chat';
+  static const String unarchiveChat = 'unarchive_chat';
+  static const String aiAssistant = 'ai_assistant';
+  static const String typing = 'typing';
+
+  // Auth screens
+  static const String signInToContinue = 'sign_in_to_continue';
+  static const String verifyYourEmail = 'verify_your_email';
+  static const String verificationEmailSentTo = 'verification_email_sent_to';
+  static const String checkEmailForVerification = 'check_email_for_verification';
+  static const String verifyEmail = 'verify_email';
+  static const String emailVerifiedSuccessfully = 'email_verified_successfully';
+  static const String emailNotVerifiedYet = 'email_not_verified_yet';
+  static const String sendResetLink = 'send_reset_link';
+  static const String on = 'on';
+  static const String username = 'username';
+  static const String emailId = 'email_id';
+  static const String phoneNumber = 'phone_number';
+  static const String update = 'update';
+  static const String changePicture = 'change_picture';
 }

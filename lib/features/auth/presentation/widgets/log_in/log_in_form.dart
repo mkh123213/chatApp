@@ -1,15 +1,12 @@
 import 'package:chat_material3/core/app/auth_cubit/auth_cubit.dart';
-import 'package:chat_material3/core/common/widgets/custom_linear_button.dart';
-import 'package:chat_material3/core/common/widgets/custom_text_field.dart';
-import 'package:chat_material3/core/common/widgets/text_app.dart';
 import 'package:chat_material3/core/extensions/context_extension.dart';
-import 'package:chat_material3/core/helper_functions/spacing.dart';
 import 'package:chat_material3/core/language/lang_keys.dart';
 import 'package:chat_material3/core/routes/app_routes.dart';
 import 'package:chat_material3/core/utils/app_regex.dart';
 import 'package:chat_material3/features/auth/presentation/widgets/log_in/log_in_bloc_consumer.dart';
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LogInForm extends StatefulWidget {
   const LogInForm({
@@ -30,92 +27,264 @@ class LogInForm extends StatefulWidget {
 }
 
 class _LogInFormState extends State<LogInForm> {
-  bool isPasswordVisible = false;
+  bool _obscurePassword = true;
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.symmetric(horizontal: 24.w),
         child: Form(
           key: widget.formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 20),
-              TextApp(
-                text: context.translate(LangKeys.welcomeBack),
-                theme: Theme.of(context).textTheme.headlineLarge!,
+              SizedBox(height: 48.h),
+              // Logo
+              Container(
+                width: 80.r,
+                height: 80.r,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2C2C54),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.wifi_tethering,
+                  color: Colors.white,
+                  size: 40.sp,
+                ),
               ),
-              TextApp(
-                text: context.translate(LangKeys.materialChatApp),
-                theme: Theme.of(context).textTheme.bodyLarge!,
+              SizedBox(height: 24.h),
+              Text(
+                'Welcome to EchoChat',
+                style: TextStyle(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w700,
+                  color: context.color.onSurface,
+                ),
               ),
-              CustomTextField(
-                validator: (p0) {
-                  if (!AppRegex.isEmailValid(p0!)) {
+              SizedBox(height: 4.h),
+              Text(
+                context.translate(LangKeys.signInToContinue),
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: context.color.onSurfaceVariant,
+                ),
+              ),
+              SizedBox(height: 32.h),
+
+              // Google sign in
+              OutlinedButton(
+                onPressed: () {
+                  context.read<AuthCubit>().signInWithGoogle();
+                },
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(28.r),
+                  ),
+                  side: BorderSide(
+                    color: context.color.outlineVariant,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'G',
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF4285F4),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Text(
+                      'Continue with Google',
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w500,
+                        color: context.color.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 24.h),
+
+              // OR divider
+              Row(
+                children: [
+                  Expanded(
+                    child: Divider(color: context.color.outlineVariant),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    child: Text(
+                      'OR',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: context.color.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Divider(color: context.color.outlineVariant),
+                  ),
+                ],
+              ),
+              SizedBox(height: 24.h),
+
+              // Email label
+              _buildLabel('Email'),
+              SizedBox(height: 6.h),
+              _buildTextField(
+                controller: widget.emailCon,
+                hint: 'you@example.com',
+                icon: Icons.email_outlined,
+                validator: (v) {
+                  if (!AppRegex.isEmailValid(v!)) {
                     return context.translate(LangKeys.invalidEmail);
                   }
                   return null;
                 },
-                controller: widget.emailCon,
-                hintText: context.translate(LangKeys.email),
-                prefixIcon: Icon(Iconsax.direct),
               ),
-              CustomTextField(
-                validator: (p0) {
-                  if (!AppRegex.isPasswordValid(p0!)) {
+              SizedBox(height: 16.h),
+
+              // Password label
+              _buildLabel('Password'),
+              SizedBox(height: 6.h),
+              _buildTextField(
+                controller: widget.passCon,
+                hint: '••••••••',
+                icon: Icons.lock_outline,
+                obscure: _obscurePassword,
+                validator: (v) {
+                  if (!AppRegex.isPasswordValid(v!)) {
                     return context.translate(LangKeys.invalidPassword);
                   }
                   return null;
                 },
-                controller: widget.passCon,
-                hintText: context.translate(LangKeys.password),
-                prefixIcon: InkWell(
-                    onTap: () {
-                      setState(() {
-                        isPasswordVisible = !isPasswordVisible;
-                      });
-                    },
-                    child: Icon(Iconsax.password_check)),
-                obscureText: isPasswordVisible,
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () {
-                      context.pushName(AppRoutes.forgetPassword);
-                    },
-                    child: TextApp(
-                      text: context.translate(LangKeys.forgetPassword),
-                      theme: context.textStyle,
-                    ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    size: 20.sp,
+                    color: context.color.onSurfaceVariant,
                   ),
-                ],
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
+                ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 24.h),
+
+              // Sign in button
               LogInBlocConsumer(
                 formKey: widget.formKey,
                 emailCon: widget.emailCon,
                 passCon: widget.passCon,
                 authCubit: widget.authCubit,
               ),
-              highspace(height: 16),
-              CustomLinearButton(
-                onPressed: () {
-                  context.pushName(AppRoutes.signUp);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: TextApp(
-                    text: context.translate(LangKeys.signUp),
-                    theme: context.textStyle,
+              SizedBox(height: 16.h),
+
+              // Forgot password
+              GestureDetector(
+                onTap: () => context.pushName(AppRoutes.forgetPassword),
+                child: Text(
+                  'Forgot password?',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: context.color.onSurfaceVariant,
                   ),
                 ),
               ),
+              SizedBox(height: 12.h),
+
+              // Sign up link
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Need an account? ',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: context.color.onSurfaceVariant,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => context.pushName(AppRoutes.signUp),
+                    child: Text(
+                      context.translate(LangKeys.signUp),
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                        color: context.color.onSurface,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 24.h),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLabel(String text) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 13.sp,
+          fontWeight: FontWeight.w600,
+          color: context.color.onSurface,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    String? Function(String?)? validator,
+    bool obscure = false,
+    Widget? suffixIcon,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscure,
+      validator: validator,
+      style: TextStyle(fontSize: 15.sp),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(
+          fontSize: 14.sp,
+          color: context.color.onSurfaceVariant.withValues(alpha: 0.6),
+        ),
+        prefixIcon: Icon(icon, size: 20.sp, color: context.color.onSurfaceVariant),
+        suffixIcon: suffixIcon,
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        filled: true,
+        fillColor: context.color.surfaceContainerHigh.withValues(alpha: 0.3),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: context.color.outlineVariant),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: context.color.outlineVariant),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: context.color.primary, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: const BorderSide(color: Colors.red),
         ),
       ),
     );

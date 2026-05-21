@@ -6,6 +6,7 @@ import 'package:chat_material3/core/extensions/context_extension.dart';
 import 'package:chat_material3/core/helper_functions/get_current_user.dart';
 import 'package:chat_material3/core/language/lang_keys.dart';
 import 'package:chat_material3/core/style/fonts/font_weight_helper.dart';
+import 'package:chat_material3/core/routes/app_routes.dart';
 import 'package:chat_material3/features/calls/presentation/bloc/calls_history_cubit/calls_history_cubit.dart';
 import 'package:chat_material3/features/main/presentation/bloc/main_cubit.dart';
 import 'package:flutter/material.dart';
@@ -70,6 +71,36 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ];
       case NavBarEnum.singleChats:
+        return [
+          Padding(
+            padding: EdgeInsets.only(right: 8.w),
+            child: ActionChip(
+              avatar: Icon(
+                Icons.smart_toy_outlined,
+                size: 18.sp,
+                color: const Color(0xFF4CAF50),
+              ),
+              label: Text(
+                'AI Assistant',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: const Color(0xFF4CAF50),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              backgroundColor: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+              side: BorderSide(
+                color: const Color(0xFF4CAF50).withValues(alpha: 0.3),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.aiAssistant);
+              },
+            ),
+          ),
+        ];
       case NavBarEnum.groups:
       case NavBarEnum.status:
       case NavBarEnum.profile:

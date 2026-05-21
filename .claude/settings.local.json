@@ -80,7 +80,12 @@
       "WebFetch(domain:preview-sandbox--6a0d4f69dbb23bf76360e832.base44.app)",
       "Bash(grep -i \"\\\\.dart$\")",
       "Bash(Select-Object -Last 20)",
-      "Bash(Get-ChildItem -Path \"C:\\\\ChatAppUiMaterial3-main\" -Recurse -Filter \"*status*\" -ErrorAction SilentlyContinue)"
+      "Bash(Get-ChildItem -Path \"C:\\\\ChatAppUiMaterial3-main\" -Recurse -Filter \"*status*\" -ErrorAction SilentlyContinue)",
+      "Bash(./gradlew assembleDebug)",
+      "Bash(./gradlew assembleDebug --stacktrace)",
+      "Bash(java *)",
+      "Bash(./gradlew clean *)",
+      "Bash(./gradlew assembleDebug --no-daemon)"
     ]
   }
 }

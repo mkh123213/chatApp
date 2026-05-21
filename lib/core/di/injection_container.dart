@@ -45,6 +45,14 @@ import 'package:chat_material3/features/calls/presentation/bloc/start_call_cubit
 import 'package:chat_material3/features/calls/presentation/bloc/incoming_call_cubit/incoming_call_cubit.dart';
 import 'package:chat_material3/features/calls/presentation/bloc/active_call_cubit/active_call_cubit.dart';
 import 'package:chat_material3/features/calls/presentation/bloc/calls_history_cubit/calls_history_cubit.dart';
+import 'package:chat_material3/features/profile/presentation/bloc/blocked_contacts_cubit.dart';
+import 'package:chat_material3/features/ai_assistant/data/ai_assistant_service.dart';
+import 'package:chat_material3/features/ai_assistant/presentation/bloc/ai_assistant_cubit.dart';
+import 'package:chat_material3/features/single_chat/data/datasources/typing_remote_data_source.dart';
+import 'package:chat_material3/features/single_chat/data/repositories/typing_repo.dart';
+import 'package:chat_material3/features/single_chat/presentation/bloc/typing_cubit/typing_cubit.dart';
+import 'package:chat_material3/features/single_chat/presentation/bloc/typing_cubit/chat_list_typing_cubit.dart';
+import 'package:chat_material3/core/service/env/env_variable.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:chat_material3/core/app/upload_image/cubit/upload_image_cubit.dart';
@@ -63,6 +71,8 @@ Future<void> setupInjector() async {
   await _initProfile();
   await _initStatus();
   await _initCalls();
+  await _initTyping();
+  await _initAiAssistant();
   // await _initHome();
   // await _initProductDetails();
   // await _initCategory();
@@ -100,6 +110,9 @@ Future<void> _initProfile() async {
     )
     ..registerFactory<ProfileCubit>(
       () => ProfileCubit(profileRemoteDataSource: sl()),
+    )
+    ..registerFactory<BlockedContactsCubit>(
+      () => BlockedContactsCubit(blockDataSource: sl<BlockRemoteDataSource>()),
     );
 }
 
@@ -273,4 +286,30 @@ Future<void> _initGroups() async {
     )
     ..registerFactory<GroupInfoCubit>(
         () => GroupInfoCubit(groupsRepo: sl<GroupsRepo>()));
+}
+
+Future<void> _initTyping() async {
+  sl
+    ..registerLazySingleton<TypingRemoteDataSource>(
+      () => TypingRemoteDataSourceImpl(),
+    )
+    ..registerLazySingleton<TypingRepo>(
+      () => TypingRepo(dataSource: sl<TypingRemoteDataSource>()),
+    )
+    ..registerFactory<TypingCubit>(
+      () => TypingCubit(typingRepo: sl<TypingRepo>()),
+    )
+    ..registerFactory<ChatListTypingCubit>(
+      () => ChatListTypingCubit(typingRepo: sl<TypingRepo>()),
+    );
+}
+
+Future<void> _initAiAssistant() async {
+  sl
+    ..registerLazySingleton<AiAssistantService>(
+      () => AiAssistantService(apiKey: EnvVariable.instance.geminiApiKey),
+    )
+    ..registerFactory<AiAssistantCubit>(
+      () => AiAssistantCubit(service: sl<AiAssistantService>()),
+    );
 }

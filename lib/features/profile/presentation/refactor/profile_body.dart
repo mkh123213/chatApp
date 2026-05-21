@@ -5,7 +5,12 @@ import 'package:chat_material3/core/extensions/context_extension.dart';
 import 'package:chat_material3/core/language/app_localizations.dart';
 import 'package:chat_material3/core/language/lang_keys.dart';
 import 'package:chat_material3/core/routes/app_routes.dart';
+import 'package:chat_material3/core/service/dnd/dnd_service.dart';
 import 'package:chat_material3/core/service/push_notification/firebase_cloud_messaging.dart';
+import 'package:chat_material3/core/service/wallpaper/wallpaper_service.dart';
+import 'package:chat_material3/core/di/injection_container.dart';
+import 'package:chat_material3/core/helper_functions/get_current_user.dart';
+import 'package:chat_material3/features/profile/presentation/bloc/blocked_contacts_cubit.dart';
 import 'package:chat_material3/features/profile/presentation/bloc/profile_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -219,26 +224,30 @@ class _NotificationTile extends StatelessWidget {
 class _DoNotDisturbTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading:
-          Icon(Icons.do_not_disturb_on_outlined, color: context.color.onSurface),
-      title: Text(
-        context.translate(LangKeys.doNotDisturb),
-        style: TextStyle(fontSize: 15.sp),
-      ),
-      subtitle: Text(
-        context.translate(LangKeys.off),
-        style: TextStyle(fontSize: 13.sp, color: context.color.onSurfaceVariant),
-      ),
-      trailing: Text(
-        context.translate(LangKeys.change),
-        style: TextStyle(
-          fontSize: 14.sp,
-          color: context.color.primary,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      onTap: () {},
+    return ValueListenableBuilder<bool>(
+      valueListenable: DndService().isEnabled,
+      builder: (_, enabled, __) {
+        return ListTile(
+          leading: Icon(Icons.do_not_disturb_on_outlined,
+              color: context.color.onSurface),
+          title: Text(
+            context.translate(LangKeys.doNotDisturb),
+            style: TextStyle(fontSize: 15.sp),
+          ),
+          subtitle: Text(
+            enabled
+                ? context.translate(LangKeys.on)
+                : context.translate(LangKeys.off),
+            style: TextStyle(
+                fontSize: 13.sp, color: context.color.onSurfaceVariant),
+          ),
+          trailing: Switch.adaptive(
+            value: enabled,
+            activeColor: context.color.primary,
+            onChanged: (_) => DndService().toggle(),
+          ),
+        );
+      },
     );
   }
 }
@@ -264,19 +273,31 @@ class _DisappearingMessagesTile extends StatelessWidget {
 class _BlockedContactsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading:
-          Icon(Icons.person_off_outlined, color: context.color.onSurface),
-      title: Text(
-        context.translate(LangKeys.blockedContacts),
-        style: TextStyle(fontSize: 15.sp),
+    return BlocProvider(
+      create: (_) => sl<BlockedContactsCubit>()
+        ..loadBlockedContacts(currentUserId: getCurrentUser().uid),
+      child: BlocBuilder<BlockedContactsCubit, BlockedContactsState>(
+        builder: (context, state) {
+          return ListTile(
+            leading: Icon(Icons.person_off_outlined,
+                color: context.color.onSurface),
+            title: Text(
+              context.translate(LangKeys.blockedContacts),
+              style: TextStyle(fontSize: 15.sp),
+            ),
+            subtitle: Text(
+              '${state.count} ${context.translate(LangKeys.blockedCount)}',
+              style: TextStyle(
+                  fontSize: 13.sp, color: context.color.onSurfaceVariant),
+            ),
+            trailing: Icon(Icons.chevron_right,
+                color: context.color.onSurfaceVariant),
+            onTap: () {
+              Navigator.pushNamed(context, AppRoutes.blockedContacts);
+            },
+          );
+        },
       ),
-      subtitle: Text(
-        '0 ${context.translate(LangKeys.blockedCount)}',
-        style: TextStyle(fontSize: 13.sp, color: context.color.onSurfaceVariant),
-      ),
-      trailing: Icon(Icons.chevron_right, color: context.color.onSurfaceVariant),
-      onTap: () {},
     );
   }
 }
@@ -304,13 +325,126 @@ class _LightModeTile extends StatelessWidget {
 class _WallpaperTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(Icons.wallpaper_outlined, color: context.color.onSurface),
-      title: Text(
-        context.translate(LangKeys.defaultWallpaper),
-        style: TextStyle(fontSize: 15.sp),
+    return ValueListenableBuilder<int>(
+      valueListenable: WallpaperService().selectedIndex,
+      builder: (_, selectedIdx, __) {
+        return ListTile(
+          leading:
+              Icon(Icons.wallpaper_outlined, color: context.color.onSurface),
+          title: Text(
+            context.translate(LangKeys.defaultWallpaper),
+            style: TextStyle(fontSize: 15.sp),
+          ),
+          subtitle: Text(
+            WallpaperService.options[selectedIdx].name,
+            style: TextStyle(
+                fontSize: 13.sp, color: context.color.onSurfaceVariant),
+          ),
+          trailing: Icon(Icons.chevron_right,
+              color: context.color.onSurfaceVariant),
+          onTap: () => _showWallpaperPicker(context),
+        );
+      },
+    );
+  }
+
+  void _showWallpaperPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: context.color.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
       ),
-      onTap: () {},
+      builder: (_) {
+        return Padding(
+          padding: EdgeInsets.all(16.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: context.color.onSurfaceVariant.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                ),
+              ),
+              SizedBox(height: 16.h),
+              Text(
+                context.translate(LangKeys.defaultWallpaper),
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: 16.h),
+              SizedBox(
+                height: 80.h,
+                child: ValueListenableBuilder<int>(
+                  valueListenable: WallpaperService().selectedIndex,
+                  builder: (_, selectedIdx, __) {
+                    return ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: WallpaperService.options.length,
+                      separatorBuilder: (_, __) => SizedBox(width: 12.w),
+                      itemBuilder: (_, index) {
+                        final opt = WallpaperService.options[index];
+                        final isSelected = index == selectedIdx;
+                        return GestureDetector(
+                          onTap: () => WallpaperService().select(index),
+                          child: Column(
+                            children: [
+                              Container(
+                                width: 48.w,
+                                height: 48.w,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: opt.isGradient
+                                      ? LinearGradient(colors: opt.colors)
+                                      : null,
+                                  color:
+                                      opt.isGradient ? null : opt.colors.first,
+                                  border: isSelected
+                                      ? Border.all(
+                                          color: context.color.primary,
+                                          width: 3,
+                                        )
+                                      : Border.all(
+                                          color: context.color.outlineVariant,
+                                          width: 1,
+                                        ),
+                                ),
+                                child: isSelected
+                                    ? Icon(Icons.check,
+                                        color: Colors.white, size: 20.sp)
+                                    : null,
+                              ),
+                              SizedBox(height: 4.h),
+                              Text(
+                                opt.name,
+                                style: TextStyle(
+                                  fontSize: 11.sp,
+                                  color: isSelected
+                                      ? context.color.primary
+                                      : context.color.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+              SizedBox(height: 16.h),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -7,6 +7,7 @@ import 'package:chat_material3/core/di/injection_container.dart';
 import 'package:chat_material3/core/routes/app_routes.dart';
 import 'package:chat_material3/core/service/push_notification/local_notfication_service.dart';
 import 'package:chat_material3/core/service/push_notification/notification_save_service.dart';
+import 'package:chat_material3/core/service/dnd/dnd_service.dart';
 import 'package:chat_material3/core/service/push_notification/active_chat_tracker.dart';
 import 'package:chat_material3/features/single_chat/data/models/chat_model.dart';
 import 'package:chat_material3/features/groups/data/models/group_model.dart';
@@ -33,11 +34,13 @@ class FirebaseMessagingNavigate {
     }
 
     await NotificationSaveService.save(message);
-    await LocalNotificationService.showSimpleNotification(
-      title: message.notification?.title ?? '',
-      body: message.notification?.body ?? '',
-      payload: _buildPayload(data),
-    );
+    if (!DndService().isEnabled.value) {
+      await LocalNotificationService.showSimpleNotification(
+        title: message.notification?.title ?? '',
+        body: message.notification?.body ?? '',
+        payload: _buildPayload(data),
+      );
+    }
   }
 
   static Future<void> backGroundHandler(RemoteMessage? message) async {

@@ -16,6 +16,8 @@ import 'package:chat_material3/core/service/shared_pref/shared_pref.dart';
 import 'package:chat_material3/core/service/push_notification/chat_notification_service.dart';
 import 'package:chat_material3/core/service/user_presence/user_presence_service.dart';
 import 'package:chat_material3/core/service/call_service/callkit_service.dart';
+import 'package:chat_material3/core/service/dnd/dnd_service.dart';
+import 'package:chat_material3/core/service/wallpaper/wallpaper_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /*************  ✨ Windsurf Command ⭐  *************/
@@ -56,6 +58,8 @@ void main() async {
   // await setupInjector();
 
   await HiveDatabase().setup();
+  DndService().init();
+  WallpaperService().init();
 
   final currentUserJson = SharedPref().getString(PrefKeys.currentUser);
   if (currentUserJson != null) {

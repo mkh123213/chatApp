@@ -36,6 +36,7 @@ class ChatMessageInput extends StatefulWidget {
     this.onSendSticker,
     this.onSendGif,
     this.hintText,
+    this.onTyping,
   });
 
   final OnSendText onSendText;
@@ -46,6 +47,7 @@ class ChatMessageInput extends StatefulWidget {
   final OnSendSticker? onSendSticker;
   final OnSendGif? onSendGif;
   final String? hintText;
+  final VoidCallback? onTyping;
 
   @override
   State<ChatMessageInput> createState() => _ChatMessageInputState();
@@ -72,6 +74,7 @@ class _ChatMessageInputState extends State<ChatMessageInput> {
     _controller.addListener(() {
       final hasText = _controller.text.trim().isNotEmpty;
       if (hasText != _hasText) setState(() => _hasText = hasText);
+      if (hasText) widget.onTyping?.call();
     });
     _focusNode.addListener(() {
       if (_focusNode.hasFocus && _activePanel != _InputPanel.none) {

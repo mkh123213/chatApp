@@ -34,6 +34,11 @@ import 'package:chat_material3/features/main/presentation/screens/main_screen.da
 import 'package:chat_material3/features/profile/presentation/screens/change_password_screen.dart';
 import 'package:chat_material3/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:chat_material3/features/profile/presentation/screens/profile_screen.dart';
+import 'package:chat_material3/features/ai_assistant/presentation/bloc/ai_assistant_cubit.dart';
+import 'package:chat_material3/features/ai_assistant/presentation/screens/ai_assistant_screen.dart';
+import 'package:chat_material3/features/profile/presentation/bloc/blocked_contacts_cubit.dart';
+import 'package:chat_material3/features/auth/presentation/screens/verify_email_screen.dart';
+import 'package:chat_material3/features/profile/presentation/screens/blocked_contacts_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_material3/core/app/upload_image/cubit/upload_image_cubit.dart';
@@ -69,6 +74,9 @@ class AppRoutes {
   static const String callsHistoryScreen = 'callsHistoryScreen';
   static const String newChat = 'newChat';
   static const String contactInfo = 'contactInfo';
+  static const String aiAssistant = 'aiAssistant';
+  static const String blockedContacts = 'blockedContacts';
+  static const String verifyEmail = 'verifyEmail';
 
   static Route<void> onGenerateRoute(RouteSettings settings) {
     final args = settings.arguments;
@@ -147,8 +155,11 @@ class AppRoutes {
         );
       case editProfile:
         return BaseRoute(
-          page: BlocProvider(
-            create: (context) => sl<UploadImageCubit>(),
+          page: MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (_) => sl<UploadImageCubit>()),
+              BlocProvider(create: (_) => sl<AuthCubit>()),
+            ],
             child: const EditProfileScreen(),
           ),
         );
@@ -217,6 +228,25 @@ class AppRoutes {
         return BaseRoute(
           page: GroupInfoScreen(
             group: args as GroupModel,
+          ),
+        );
+      case verifyEmail:
+        return BaseRoute(
+          page: const VerifyEmailScreen(),
+        );
+      case blockedContacts:
+        return BaseRoute(
+          page: BlocProvider(
+            create: (_) => sl<BlockedContactsCubit>()
+              ..loadBlockedContacts(currentUserId: getCurrentUser().uid),
+            child: const BlockedContactsScreen(),
+          ),
+        );
+      case aiAssistant:
+        return BaseRoute(
+          page: BlocProvider(
+            create: (_) => sl<AiAssistantCubit>(),
+            child: const Scaffold(body: AiAssistantScreen()),
           ),
         );
       case webview:

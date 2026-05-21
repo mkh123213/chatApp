@@ -9,21 +9,29 @@ class IconTapNavBar extends StatelessWidget {
     required this.onTap,
     required this.icon,
     required this.isSelected,
+    this.activeColor,
+    this.inactiveColor,
     super.key,
   });
   final VoidCallback onTap;
   final String icon;
   final bool isSelected;
+  final Color? activeColor;
+  final Color? inactiveColor;
 
   @override
   Widget build(BuildContext context) {
+    final color = isSelected
+        ? (activeColor ?? const Color(0xFF25D366))
+        : (inactiveColor ?? context.color.onSurfaceVariant);
+
     return GestureDetector(
       onTap: onTap,
       child: SvgPicture.asset(
         icon,
-        // color: isSelected ? context.color.navBarSelectedTab : Colors.grey,
         height: 25.h,
-      ).animate(target: isSelected ? 1 : 0).scaleXY(end: 1.2),
+        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+      ).animate(target: isSelected ? 1 : 0).scaleXY(end: 1.1),
     );
   }
 }

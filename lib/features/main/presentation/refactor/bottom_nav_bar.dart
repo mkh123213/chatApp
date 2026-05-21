@@ -4,7 +4,6 @@ import 'package:chat_material3/core/common/widgets/text_app.dart';
 import 'package:chat_material3/core/di/injection_container.dart';
 import 'package:chat_material3/core/enums/nav_bar_enum.dart';
 import 'package:chat_material3/core/extensions/context_extension.dart';
-import 'package:chat_material3/core/helper_functions/spacing.dart';
 import 'package:chat_material3/core/language/lang_keys.dart';
 import 'package:chat_material3/features/main/presentation/bloc/main_cubit.dart';
 import 'package:chat_material3/features/main/presentation/widgets/icon_tap_nav_bar.dart';
@@ -68,14 +67,13 @@ class MainBottomNavBar extends StatelessWidget {
               vertical: 12.h,
             ),
             decoration: BoxDecoration(
-              color: context.color.surface.withOpacity(0.90),
-              boxShadow: [
-                BoxShadow(
-                  color: context.color.background.withValues(alpha: 0.1),
-                  blurRadius: 24.r,
-                  offset: Offset(0, -8.h),
+              color: context.color.surface,
+              border: Border(
+                top: BorderSide(
+                  color: context.color.outlineVariant.withValues(alpha: 0.3),
+                  width: 0.5,
                 ),
-              ],
+              ),
             ),
             child: BlocBuilder<MainCubit, MainState>(
               builder: (context, state) {
@@ -119,9 +117,11 @@ class _MainBottomNavItem extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
+  static const Color _selectedGreen = Color(0xFF25D366);
+
   @override
   Widget build(BuildContext context) {
-    final Color activeColor = context.color.onPrimaryContainer;
+    final Color activeColor = _selectedGreen;
     final Color inactiveColor = context.color.onSurfaceVariant;
 
     return Material(
@@ -129,36 +129,38 @@ class _MainBottomNavItem extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12.r),
-        splashColor: context.color.primaryContainer.withOpacity(0.16),
-        highlightColor: context.color.primaryContainer.withOpacity(0.10),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
+        splashColor: _selectedGreen.withValues(alpha: 0.1),
+        highlightColor: _selectedGreen.withValues(alpha: 0.05),
+        child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: isSelected ? 12.w : 8.w,
+            horizontal: 8.w,
             vertical: 6.h,
-          ),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? context.color.primaryContainer
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(12.r),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              IconTapNavBar(
-                icon: icon,
-                isSelected: isSelected,
-                onTap: onTap,
+              SizedBox(
+                height: 28.h,
+                child: Center(
+                  child: IconTapNavBar(
+                    icon: icon,
+                    isSelected: isSelected,
+                    onTap: onTap,
+                    activeColor: activeColor,
+                    inactiveColor: inactiveColor,
+                  ),
+                ),
               ),
-              highspace(height: 4),
+              SizedBox(height: 4.h),
               TextApp(
-                  text: title,
-                  theme: context.textStyle.copyWith(
-                    fontSize: 12.sp,
-                    color: isSelected ? activeColor : inactiveColor,
-                  )),
+                text: title,
+                textAlign: TextAlign.center,
+                theme: context.textStyle.copyWith(
+                  fontSize: 12.sp,
+                  color: isSelected ? activeColor : inactiveColor,
+                ),
+              ),
             ],
           ),
         ),

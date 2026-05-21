@@ -16,6 +16,7 @@ import 'package:chat_material3/core/service/call_service/callkit_service.dart';
 import 'package:chat_material3/features/calls/presentation/widgets/incoming_call_overlay.dart';
 import 'package:chat_material3/features/single_chat/presentation/bloc/create_chat_cubit/create_chat_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/bloc/get_chatss/chats_cubit.dart';
+import 'package:chat_material3/features/single_chat/presentation/bloc/typing_cubit/chat_list_typing_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/screens/chat_home_screen.dart';
 import 'package:chat_material3/features/main/presentation/bloc/main_cubit.dart';
 import 'package:chat_material3/features/main/presentation/refactor/bottom_nav_bar.dart';
@@ -44,6 +45,9 @@ class MainScreen extends StatelessWidget {
         BlocProvider(
           create: (_) => sl<CallsHistoryCubit>()
             ..getCallsHistory(currentUserId: getCurrentUser().uid),
+        ),
+        BlocProvider(
+          create: (_) => sl<ChatListTypingCubit>(),
         ),
       ],
       child: BlocListener<IncomingCallCubit, IncomingCallState>(
