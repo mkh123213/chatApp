@@ -1,12 +1,5 @@
-// REUSABLE SERVICE: Native call UI (CallKit/Android CallScreen) handler.
-// REQUIRES: flutter_callkit_incoming, cloud_firestore packages in pubspec.yaml
-// CHANGE: Update DI import (injection_container) to your project's DI.
-// CHANGE: Update AppRoutes import to your project's route names.
-// CHANGE: Update CallModel and CallsRepo imports to your project's call models/repos.
-import 'package:chat_material3/core/di/injection_container.dart'; // CHANGE: your DI
-import 'package:chat_material3/core/routes/app_routes.dart'; // CHANGE: your routes
-import 'package:chat_material3/features/calls/data/models/call_model.dart'; // CHANGE: your call model
-import 'package:chat_material3/features/calls/data/repositories/calls_repo.dart'; // CHANGE: your calls repo
+import 'package:chat_material3/constants/fierstore_paths.dart';
+import 'package:chat_material3/core/service/pending_navigation/pending_navigation_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_callkit_incoming/entities/android_params.dart';
@@ -15,7 +8,6 @@ import 'package:flutter_callkit_incoming/entities/ios_params.dart';
 import 'package:flutter_callkit_incoming/entities/notification_params.dart';
 import 'package:flutter_callkit_incoming/entities/call_event.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
-import 'package:chat_material3/constants/fierstore_paths.dart';
 
 class CallKitService {
   CallKitService._();
@@ -104,39 +96,17 @@ class CallKitService {
   Future<void> _handleAccept(String callId) async {
     if (callId.isEmpty) return;
     try {
-      final doc = await FirebaseFirestore.instance
-          .doc('$callsCollection/$callId')
-          .get();
-      if (!doc.exists || doc.data() == null) return;
-
-      final call = CallModel.fromFirestore(id: doc.id, data: doc.data()!);
-
-      final callsRepo = sl<CallsRepo>();
-      await callsRepo.acceptCall(callId: callId);
-
-      await _navigateWhenReady(AppRoutes.callScreen, call);
+      await _acceptCallDirect(callId);
+      PendingNavigationService.instance.setPendingCall(callId);
     } catch (e) {
       debugPrint('CallKit accept error: $e');
     }
   }
 
-  Future<void> _navigateWhenReady(String route, Object arguments) async {
-    for (var i = 0; i < 10; i++) {
-      final navState = sl<GlobalKey<NavigatorState>>().currentState;
-      if (navState != null) {
-        navState.pushNamed(route, arguments: arguments);
-        return;
-      }
-      await Future.delayed(const Duration(milliseconds: 500));
-    }
-    debugPrint('CallKit: navigator not ready after retries');
-  }
-
   Future<void> _handleDecline(String callId) async {
     if (callId.isEmpty) return;
     try {
-      final callsRepo = sl<CallsRepo>();
-      await callsRepo.rejectCall(callId: callId);
+      await _rejectCallDirect(callId);
     } catch (e) {
       debugPrint('CallKit decline error: $e');
     }
@@ -145,10 +115,33 @@ class CallKitService {
   Future<void> _handleTimeout(String callId) async {
     if (callId.isEmpty) return;
     try {
-      final callsRepo = sl<CallsRepo>();
-      await callsRepo.missCall(callId: callId);
+      await _missCallDirect(callId);
     } catch (e) {
       debugPrint('CallKit timeout error: $e');
     }
+  }
+
+  Future<void> _acceptCallDirect(String callId) async {
+    await FirebaseFirestore.instance.doc('$callsCollection/$callId').update({
+      'status': 'accepted',
+      'acceptedAt': Timestamp.now(),
+      'updatedAt': Timestamp.now(),
+    });
+  }
+
+  Future<void> _rejectCallDirect(String callId) async {
+    await FirebaseFirestore.instance.doc('$callsCollection/$callId').update({
+      'status': 'rejected',
+      'endedAt': Timestamp.now(),
+      'updatedAt': Timestamp.now(),
+    });
+  }
+
+  Future<void> _missCallDirect(String callId) async {
+    await FirebaseFirestore.instance.doc('$callsCollection/$callId').update({
+      'status': 'missed',
+      'endedAt': Timestamp.now(),
+      'updatedAt': Timestamp.now(),
+    });
   }
 }
