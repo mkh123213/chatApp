@@ -23,6 +23,7 @@ import 'package:chat_material3/features/single_chat/presentation/bloc/typing_cub
 import 'package:chat_material3/features/single_chat/presentation/bloc/user_presence_cubit/user_presence_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/widgets/messages_list_view.dart';
 import 'package:chat_material3/features/single_chat/presentation/widgets/user_presence_status.dart';
+import 'package:chat_material3/core/common/widgets/user_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -336,6 +337,12 @@ class _SingleChatHeader extends StatelessWidget {
 
             return ChatAppBar(
               title: friendDisplayName,
+              avatar: UserAvatar(
+                userId: friendId,
+                displayName: friendDisplayName,
+                radius: 20,
+                fontSize: 14,
+              ),
               subtitle: isBlocked
                   ? null
                   : (friendId.isNotEmpty ? UserPresenceStatus(friendId: friendId) : null),

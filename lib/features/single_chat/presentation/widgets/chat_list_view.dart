@@ -1,6 +1,7 @@
 import 'package:chat_material3/core/common/toast/show_toast.dart';
 import 'package:chat_material3/core/common/widgets/chat/chat_widgets.dart';
 import 'package:chat_material3/core/common/widgets/text_app.dart';
+import 'package:chat_material3/core/common/widgets/user_avatar.dart';
 import 'package:chat_material3/core/di/injection_container.dart';
 import 'package:chat_material3/core/extensions/context_extension.dart';
 import 'package:chat_material3/core/helper_functions/get_current_user.dart';
@@ -215,37 +216,7 @@ class _ArchivedSection extends StatelessWidget {
   }
 }
 
-const List<Color> _avatarColors = [
-  Color(0xFFEF5350),
-  Color(0xFF42A5F5),
-  Color(0xFF66BB6A),
-  Color(0xFFFFA726),
-  Color(0xFFAB47BC),
-  Color(0xFF26C6DA),
-  Color(0xFFEC407A),
-  Color(0xFF8D6E63),
-];
 
-Color _getAvatarColor(String text) {
-  final hash = text.codeUnits.fold<int>(0, (prev, c) => prev + c);
-  return _avatarColors[hash % _avatarColors.length];
-}
-
-String _getInitials(String name) {
-  if (name.isEmpty) return '?';
-  final parts = name.trim().split(RegExp(r'\s+'));
-  if (parts.length >= 2) {
-    return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-  }
-  final cleanName = name.split('@').first;
-  final nameParts = cleanName.split(RegExp(r'[._\-]'));
-  if (nameParts.length >= 2) {
-    return '${nameParts[0][0]}${nameParts[1][0]}'.toUpperCase();
-  }
-  return cleanName.length >= 2
-      ? '${cleanName[0]}${cleanName[1]}'.toUpperCase()
-      : cleanName[0].toUpperCase();
-}
 
 String _formatTime(DateTime? time) {
   if (time == null) return '';
@@ -296,9 +267,9 @@ class _ChatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUserId = getCurrentUser().uid;
+    final friendId = chat.users.where((id) => id != currentUserId).firstOrNull ?? '';
     final displayName = _getFriendDisplayName(chat);
-    final initials = _getInitials(displayName);
-    final avatarColor = _getAvatarColor(displayName);
     final timeText = _formatTime(chat.lastMessageTime);
 
     return InkWell(
@@ -311,17 +282,11 @@ class _ChatTile extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 26.r,
-              backgroundColor: avatarColor,
-              child: Text(
-                initials,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+            UserAvatar(
+              userId: friendId,
+              displayName: displayName,
+              radius: 26,
+              fontSize: 16,
             ),
             SizedBox(width: 12.w),
             Expanded(

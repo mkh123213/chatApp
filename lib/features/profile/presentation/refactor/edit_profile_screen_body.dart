@@ -1,9 +1,17 @@
+import 'dart:convert';
+
+import 'package:chat_material3/constants/fierstore_paths.dart';
 import 'package:chat_material3/core/app/auth_cubit/auth_cubit.dart';
 import 'package:chat_material3/core/app/upload_image/cubit/upload_image_cubit.dart';
 import 'package:chat_material3/core/common/toast/show_toast.dart';
 import 'package:chat_material3/core/extensions/context_extension.dart';
 import 'package:chat_material3/core/helper_functions/get_current_user.dart';
 import 'package:chat_material3/core/language/lang_keys.dart';
+import 'package:chat_material3/core/service/fierstore/firestore_service.dart';
+import 'package:chat_material3/core/service/shared_pref/pref_keys.dart';
+import 'package:chat_material3/core/service/shared_pref/shared_pref.dart';
+import 'package:chat_material3/core/helper_functions/user_photo_cache.dart';
+import 'package:chat_material3/core/di/injection_container.dart';
 import 'package:chat_material3/core/utils/app_regex.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,6 +29,7 @@ class _EditProfileScreenBodyState extends State<EditProfileScreenBody> {
   late final TextEditingController _nameCon;
   late final TextEditingController _emailCon;
   late final TextEditingController _phoneCon;
+  String? _currentPhotoUrl;
 
   @override
   void initState() {
@@ -29,6 +38,7 @@ class _EditProfileScreenBodyState extends State<EditProfileScreenBody> {
     _nameCon = TextEditingController(text: user.name ?? '');
     _emailCon = TextEditingController(text: user.email ?? '');
     _phoneCon = TextEditingController(text: user.phoneNumber ?? '');
+    _currentPhotoUrl = user.photoUrl;
   }
 
   @override
@@ -37,6 +47,28 @@ class _EditProfileScreenBodyState extends State<EditProfileScreenBody> {
     _emailCon.dispose();
     _phoneCon.dispose();
     super.dispose();
+  }
+
+  Future<void> _savePhotoUrl(String photoUrl) async {
+    final user = getCurrentUser();
+    if (user.uid.isEmpty) return;
+
+    final updatedUser = user.copyWith(photoUrl: photoUrl);
+
+    await SharedPref().setString(
+      PrefKeys.currentUser,
+      jsonEncode(updatedUser.toJson()),
+    );
+    await SharedPref().setString(PrefKeys.currentUserUrl, photoUrl);
+
+    await sl<DataBaseService>().setData(
+      path: '$usersCollection/${user.uid}',
+      data: {'photoUrl': photoUrl, 'updatedAt': DateTime.now().toIso8601String()},
+      merge: true,
+    );
+
+    UserPhotoCache().invalidate(user.uid);
+    setState(() => _currentPhotoUrl = photoUrl);
   }
 
   void _updateProfile() {
@@ -53,29 +85,24 @@ class _EditProfileScreenBodyState extends State<EditProfileScreenBody> {
     final user = getCurrentUser();
     final name = user.name ?? '';
     final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+    final hasPhoto = _currentPhotoUrl != null && _currentPhotoUrl!.isNotEmpty;
 
     return Scaffold(
       body: Column(
         children: [
-          // Header
           Container(
             width: double.infinity,
             padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-            decoration: BoxDecoration(
-              color: context.color.primary,
-            ),
+            decoration: BoxDecoration(color: context.color.primary),
             child: Column(
               children: [
-                // Top bar
                 Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
                   child: Row(
                     children: [
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: Icon(Icons.arrow_back,
-                            color: Colors.white, size: 22.sp),
+                        icon: Icon(Icons.arrow_back, color: Colors.white, size: 22.sp),
                       ),
                       Expanded(
                         child: Text(
@@ -88,53 +115,90 @@ class _EditProfileScreenBodyState extends State<EditProfileScreenBody> {
                           ),
                         ),
                       ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(Icons.share_outlined,
-                            color: Colors.white, size: 22.sp),
-                      ),
+                      SizedBox(width: 48.w),
                     ],
                   ),
                 ),
                 SizedBox(height: 8.h),
-                // Avatar
-                GestureDetector(
-                  onTap: () {
-                    context.read<UploadImageCubit>().uploadImage();
+                BlocConsumer<UploadImageCubit, UploadImageState>(
+                  listener: (context, state) {
+                    state.whenOrNull(
+                      success: () {
+                        final url = context.read<UploadImageCubit>().getImageUrl;
+                        if (url.isNotEmpty) {
+                          _savePhotoUrl(url);
+                          ShowToast.showToastSuccessTop(
+                            message: context.translate(LangKeys.imageUploadedSuccessfully),
+                          );
+                        }
+                      },
+                      error: (error) {
+                        ShowToast.showToastErrorTop(message: error);
+                      },
+                    );
                   },
-                  child: CircleAvatar(
-                    radius: 50.r,
-                    backgroundColor: Colors.white.withValues(alpha: 0.3),
-                    backgroundImage:
-                        user.photoUrl != null && user.photoUrl!.isNotEmpty
-                            ? NetworkImage(user.photoUrl!)
-                            : null,
-                    child: user.photoUrl == null || user.photoUrl!.isEmpty
-                        ? Text(
-                            initial,
+                  builder: (context, state) {
+                    final isUploading = state is LoadingState;
+                    return GestureDetector(
+                      onTap: isUploading
+                          ? null
+                          : () => context.read<UploadImageCubit>().uploadImage(),
+                      child: Column(
+                        children: [
+                          Stack(
+                            children: [
+                              CircleAvatar(
+                                radius: 50.r,
+                                backgroundColor: Colors.white.withValues(alpha: 0.3),
+                                backgroundImage: hasPhoto
+                                    ? NetworkImage(_currentPhotoUrl!)
+                                    : null,
+                                child: isUploading
+                                    ? const CircularProgressIndicator(color: Colors.white)
+                                    : !hasPhoto
+                                        ? Text(
+                                            initial,
+                                            style: TextStyle(
+                                              fontSize: 40.sp,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : null,
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: Container(
+                                  width: 32.w,
+                                  height: 32.w,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: context.color.primary, width: 2),
+                                  ),
+                                  child: Icon(Icons.camera_alt, size: 16.sp, color: context.color.primary),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8.h),
+                          Text(
+                            context.translate(LangKeys.changePicture),
                             style: TextStyle(
-                              fontSize: 40.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              fontSize: 14.sp,
+                              color: Colors.white.withValues(alpha: 0.9),
                             ),
-                          )
-                        : null,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  context.translate(LangKeys.changePicture),
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: Colors.white.withValues(alpha: 0.9),
-                  ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
                 SizedBox(height: 16.h),
               ],
             ),
           ),
-
-          // Form
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
@@ -145,8 +209,7 @@ class _EditProfileScreenBodyState extends State<EditProfileScreenBody> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(height: 24.h),
-                      _buildLabel(
-                          context, context.translate(LangKeys.username)),
+                      _buildLabel(context, context.translate(LangKeys.username)),
                       SizedBox(height: 6.h),
                       _buildField(
                         controller: _nameCon,
@@ -167,8 +230,7 @@ class _EditProfileScreenBodyState extends State<EditProfileScreenBody> {
                         keyboardType: TextInputType.emailAddress,
                         validator: (v) {
                           if (v == null || v.trim().isEmpty) {
-                            return context
-                                .translate(LangKeys.emailCannotBeEmpty);
+                            return context.translate(LangKeys.emailCannotBeEmpty);
                           }
                           if (!AppRegex.isEmailValid(v.trim())) {
                             return context.translate(LangKeys.invalidEmail);
@@ -177,19 +239,15 @@ class _EditProfileScreenBodyState extends State<EditProfileScreenBody> {
                         },
                       ),
                       SizedBox(height: 20.h),
-                      _buildLabel(
-                          context, context.translate(LangKeys.phoneNumber)),
+                      _buildLabel(context, context.translate(LangKeys.phoneNumber)),
                       SizedBox(height: 6.h),
                       _buildField(
                         controller: _phoneCon,
                         hint: context.translate(LangKeys.phone),
                         keyboardType: TextInputType.phone,
                         validator: (v) {
-                          if (v != null &&
-                              v.isNotEmpty &&
-                              !AppRegex.isPhoneValid(v)) {
-                            return context
-                                .translate(LangKeys.invalidPhoneNumber);
+                          if (v != null && v.isNotEmpty && !AppRegex.isPhoneValid(v)) {
+                            return context.translate(LangKeys.invalidPhoneNumber);
                           }
                           return null;
                         },
@@ -200,34 +258,28 @@ class _EditProfileScreenBodyState extends State<EditProfileScreenBody> {
                       _buildField(
                         hint: '••••••••',
                         readOnly: true,
-                        onTap: () => Navigator.pushNamed(
-                            context, 'security'),
+                        onTap: () => Navigator.pushNamed(context, 'security'),
                       ),
                       SizedBox(height: 32.h),
-                      // Update button
                       BlocConsumer<AuthCubit, AuthState>(
                         listener: (context, state) {
                           state.whenOrNull(
                             userUpdated: () => ShowToast.showToastSuccessTop(
-                              message: context.translate(
-                                  LangKeys.profileUpdatedSuccessfully),
+                              message: context.translate(LangKeys.profileUpdatedSuccessfully),
                             ),
-                            error: (message) =>
-                                ShowToast.showToastErrorTop(message: message),
+                            error: (message) => ShowToast.showToastErrorTop(message: message),
                           );
                         },
                         builder: (context, state) {
                           return state.maybeWhen(
-                            loading: () => const Center(
-                                child: CircularProgressIndicator()),
+                            loading: () => const Center(child: CircularProgressIndicator()),
                             orElse: () => SizedBox(
                               width: double.infinity,
                               child: FilledButton(
                                 onPressed: _updateProfile,
                                 style: FilledButton.styleFrom(
                                   backgroundColor: const Color(0xFF1E1E2E),
-                                  padding:
-                                      EdgeInsets.symmetric(vertical: 16.h),
+                                  padding: EdgeInsets.symmetric(vertical: 16.h),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12.r),
                                   ),
@@ -289,8 +341,7 @@ class _EditProfileScreenBodyState extends State<EditProfileScreenBody> {
           fontSize: 14.sp,
           color: context.color.onSurfaceVariant.withValues(alpha: 0.6),
         ),
-        contentPadding:
-            EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         filled: true,
         fillColor: context.color.surfaceContainerHigh.withValues(alpha: 0.3),
         border: OutlineInputBorder(

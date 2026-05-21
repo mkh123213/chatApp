@@ -114,11 +114,22 @@ class CallKitService {
       final callsRepo = sl<CallsRepo>();
       await callsRepo.acceptCall(callId: callId);
 
-      final navState = sl<GlobalKey<NavigatorState>>().currentState;
-      navState?.pushNamed(AppRoutes.callScreen, arguments: call);
+      await _navigateWhenReady(AppRoutes.callScreen, call);
     } catch (e) {
       debugPrint('CallKit accept error: $e');
     }
+  }
+
+  Future<void> _navigateWhenReady(String route, Object arguments) async {
+    for (var i = 0; i < 10; i++) {
+      final navState = sl<GlobalKey<NavigatorState>>().currentState;
+      if (navState != null) {
+        navState.pushNamed(route, arguments: arguments);
+        return;
+      }
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+    debugPrint('CallKit: navigator not ready after retries');
   }
 
   Future<void> _handleDecline(String callId) async {

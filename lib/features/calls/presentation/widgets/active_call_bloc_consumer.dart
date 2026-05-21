@@ -18,10 +18,7 @@ class ActiveCallBlocConsumer extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<ActiveCallCubit, ActiveCallState>(
       listener: (context, state) {
-        if (state is ActiveCallEnded) {
-          context.read<ActiveCallCubit>().leaveChannel();
-          Navigator.of(context).pop();
-        } else if (state is ActiveCallError) {
+        if (state is ActiveCallError) {
           ShowToast.showToastErrorTop(message: state.message);
         }
       },

@@ -111,7 +111,12 @@ class _ProfileHeader extends StatelessWidget {
                   bottom: 0,
                   right: 0,
                   child: GestureDetector(
-                    onTap: () => context.pushName(AppRoutes.editProfile),
+                    onTap: () async {
+                      await Navigator.pushNamed(context, AppRoutes.editProfile);
+                      if (context.mounted) {
+                        context.read<ProfileCubit>().loadUser();
+                      }
+                    },
                     child: Container(
                       width: 32.w,
                       height: 32.w,
@@ -132,7 +137,12 @@ class _ProfileHeader extends StatelessWidget {
             SizedBox(height: 12.h),
             // Name with edit icon
             GestureDetector(
-              onTap: () => context.pushName(AppRoutes.editProfile),
+              onTap: () async {
+                      await Navigator.pushNamed(context, AppRoutes.editProfile);
+                      if (context.mounted) {
+                        context.read<ProfileCubit>().loadUser();
+                      }
+                    },
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

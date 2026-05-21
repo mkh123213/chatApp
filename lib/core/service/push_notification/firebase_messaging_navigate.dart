@@ -19,10 +19,9 @@ class FirebaseMessagingNavigate {
     final data = message.data;
     final route = data['route'] as String? ?? '';
 
-    if (route == 'call') {
-      await _handleCallNotification(data);
-      return;
-    }
+    // In foreground, incoming calls are handled by IncomingCallCubit via Firestore stream.
+    // Don't show CallKit overlay to avoid duplicate call UIs.
+    if (route == 'call') return;
 
     if (route == 'chat' &&
         ActiveChatTracker.instance.isActiveChat(data['chatId'] ?? '')) {
@@ -84,9 +83,39 @@ class FirebaseMessagingNavigate {
     final id = parts[1];
 
     if (route == 'chat') {
-      _navigateToChatById(id);
+      _navigateToChatByIdDirect(id);
     } else if (route == 'group') {
-      _navigateToGroupById(id);
+      _navigateToGroupByIdDirect(id);
+    }
+  }
+
+  static Future<void> _navigateToChatByIdDirect(String chatId) async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .doc('$chatsCollection/$chatId')
+          .get();
+      if (!doc.exists || doc.data() == null) return;
+
+      final chat = ChatModel.fromFirestore(id: doc.id, data: doc.data()!);
+      final navState = await _waitForNavigator();
+      navState?.pushNamed(AppRoutes.singleChat, arguments: chat);
+    } catch (e) {
+      debugPrint('Navigation to chat failed: $e');
+    }
+  }
+
+  static Future<void> _navigateToGroupByIdDirect(String groupId) async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .doc('$groupsCollection/$groupId')
+          .get();
+      if (!doc.exists || doc.data() == null) return;
+
+      final group = GroupModel.fromFirestore(id: doc.id, data: doc.data()!);
+      final navState = await _waitForNavigator();
+      navState?.pushNamed(AppRoutes.selectedGroupChat, arguments: group);
+    } catch (e) {
+      debugPrint('Navigation to group failed: $e');
     }
   }
 
@@ -119,6 +148,16 @@ class FirebaseMessagingNavigate {
     }
   }
 
+  static Future<NavigatorState?> _waitForNavigator() async {
+    for (var i = 0; i < 10; i++) {
+      final navState = sl<GlobalKey<NavigatorState>>().currentState;
+      if (navState != null) return navState;
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+    debugPrint('Navigator not ready after retries');
+    return null;
+  }
+
   static Future<void> _navigateToChatById(String chatId) async {
     try {
       final doc = await FirebaseFirestore.instance
@@ -127,8 +166,13 @@ class FirebaseMessagingNavigate {
       if (!doc.exists || doc.data() == null) return;
 
       final chat = ChatModel.fromFirestore(id: doc.id, data: doc.data()!);
-      final navState = sl<GlobalKey<NavigatorState>>().currentState;
-      navState?.pushNamed(AppRoutes.singleChat, arguments: chat);
+      final navState = await _waitForNavigator();
+      if (navState == null) return;
+      navState.pushNamedAndRemoveUntil(
+        AppRoutes.mainScreen,
+        (route) => false,
+      );
+      navState.pushNamed(AppRoutes.singleChat, arguments: chat);
     } catch (e) {
       debugPrint('Navigation to chat failed: $e');
     }
@@ -142,8 +186,13 @@ class FirebaseMessagingNavigate {
       if (!doc.exists || doc.data() == null) return;
 
       final group = GroupModel.fromFirestore(id: doc.id, data: doc.data()!);
-      final navState = sl<GlobalKey<NavigatorState>>().currentState;
-      navState?.pushNamed(AppRoutes.selectedGroupChat, arguments: group);
+      final navState = await _waitForNavigator();
+      if (navState == null) return;
+      navState.pushNamedAndRemoveUntil(
+        AppRoutes.mainScreen,
+        (route) => false,
+      );
+      navState.pushNamed(AppRoutes.selectedGroupChat, arguments: group);
     } catch (e) {
       debugPrint('Navigation to group failed: $e');
     }
