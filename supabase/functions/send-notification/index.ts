@@ -81,6 +81,8 @@ Deno.serve(async (req: Request) => {
     const accessToken = await getAccessToken();
     const projectId = Deno.env.get("FCM_PROJECT_ID")!;
 
+    const isCall = data?.route === "call";
+
     const message: Record<string, unknown> = {
       token,
       data: data ?? {},
@@ -89,17 +91,39 @@ Deno.serve(async (req: Request) => {
         : {
             notification: {
               sound: "default",
-              channel_id: "high_importance_channel",
+              channel_id: "chat-notifications",
             },
           },
-      apns: dataOnly
+      apns: isCall
         ? {
-            payload: { aps: { "content-available": 1 } },
-            headers: { "apns-priority": "10" },
+            payload: {
+              aps: {
+                "content-available": 1,
+                alert: {
+                  title: data?.callerName ?? "Incoming Call",
+                  body: data?.callType === "video" ? "Incoming Video Call" : "Incoming Audio Call",
+                },
+                sound: "default",
+                "interruption-level": "time-sensitive",
+              },
+            },
+            headers: {
+              "apns-push-type": "alert",
+              "apns-priority": "10",
+            },
           }
-        : {
-            payload: { aps: { sound: "default", "content-available": 1 } },
-          },
+        : dataOnly
+          ? {
+              payload: { aps: { "content-available": 1 } },
+              headers: {
+                "apns-push-type": "background",
+                "apns-priority": "5",
+              },
+            }
+          : {
+              payload: { aps: { sound: "default", "content-available": 1 } },
+              headers: { "apns-push-type": "alert", "apns-priority": "10" },
+            },
     };
 
     if (!dataOnly && title) {

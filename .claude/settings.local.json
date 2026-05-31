@@ -85,7 +85,8 @@
       "Bash(./gradlew assembleDebug --stacktrace)",
       "Bash(java *)",
       "Bash(./gradlew clean *)",
-      "Bash(./gradlew assembleDebug --no-daemon)"
+      "Bash(./gradlew assembleDebug --no-daemon)",
+      "Bash(grep -E \"lib/.*app\\\\.dart$\")"
     ]
   }
 }
