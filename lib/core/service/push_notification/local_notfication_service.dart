@@ -34,12 +34,20 @@ class LocalNotificationService {
     if (androidPlugin != null) {
       await androidPlugin.requestNotificationsPermission();
 
-      const channel = AndroidNotificationChannel(
+      const chatChannel = AndroidNotificationChannel(
         'chat-notifications',
         'Chat Notifications',
         importance: Importance.max,
       );
-      await androidPlugin.createNotificationChannel(channel);
+      await androidPlugin.createNotificationChannel(chatChannel);
+
+      const callChannel = AndroidNotificationChannel(
+        'call-notifications',
+        'Call Notifications',
+        importance: Importance.max,
+        playSound: true,
+      );
+      await androidPlugin.createNotificationChannel(callChannel);
     }
   }
 

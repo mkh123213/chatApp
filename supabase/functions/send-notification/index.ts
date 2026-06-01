@@ -69,7 +69,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { token, title, body, data, dataOnly } = await req.json();
+    const { token, title, body, data, dataOnly, priority } = await req.json();
 
     if (!token) {
       return new Response(JSON.stringify({ error: "token is required" }), {
@@ -86,14 +86,23 @@ Deno.serve(async (req: Request) => {
     const message: Record<string, unknown> = {
       token,
       data: data ?? {},
-      android: dataOnly
-        ? { priority: "high" }
-        : {
+      android: isCall
+        ? {
+            priority: "high",
             notification: {
               sound: "default",
-              channel_id: "chat-notifications",
+              channel_id: "call-notifications",
             },
-          },
+          }
+        : dataOnly
+          ? { priority: "high" }
+          : {
+              priority: priority === "high" ? "high" : "normal",
+              notification: {
+                sound: "default",
+                channel_id: "chat-notifications",
+              },
+            },
       apns: isCall
         ? {
             payload: {
@@ -126,7 +135,12 @@ Deno.serve(async (req: Request) => {
             },
     };
 
-    if (!dataOnly && title) {
+    if (isCall) {
+      message.notification = {
+        title: title ?? data?.callerName ?? "Incoming Call",
+        body: body ?? (data?.callType === "video" ? "Incoming Video Call" : "Incoming Audio Call"),
+      };
+    } else if (!dataOnly && title) {
       message.notification = { title, body: body ?? "" };
     }
 
