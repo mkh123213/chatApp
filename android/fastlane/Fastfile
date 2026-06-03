@@ -7,8 +7,8 @@ default_platform(:android)
 platform :android do
   desc "Lane for Android Firebase App Distribution"
   lane :firebase_distribution do
-    token = '1//03X8kw5-_AmnfCgYIARAAGAMSNwF-L9IrCzyj0oMkm4zuIcjHCDJEo90CWtn1ejuhr90ZYAbzLeCKZViPE-oLesfc3zuvqkLQW3o'
-    UI.user_error!("FIREBASE_CLI_TOKEN is not set. Run `firebase login:ci` and export the token.") if token.nil? || token.strip.empty?
+    token = ENV["FIREBASE_CLI_TOKEN"]
+    UI.user_error!("FIREBASE_CLI_TOKEN is not set. Add it as a GitHub secret.") if token.nil? || token.strip.empty?
 
     sh "flutter clean"
     sh "flutter build apk --release --flavor Production --split-per-abi --target lib/main.dart --no-tree-shake-icons"

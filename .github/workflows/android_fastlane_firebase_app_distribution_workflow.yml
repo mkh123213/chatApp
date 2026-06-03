@@ -3,7 +3,7 @@ name: Android Fastlane with Firebase App Distribution Workflow
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   distribute_to_firebase:
@@ -26,9 +26,6 @@ jobs:
 
     - name: Flutter dependencies
       run: flutter pub get
-
-    - name: Build APK
-      run: flutter build apk --release --flavor Production --split-per-abi --target lib/main.dart
 
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
