@@ -27,7 +27,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// - Initialize the Firebase with the environment variables.
 /// - Set the preferred device orientations.
 /// *****  c78a5125-ab94-4539-938e-d2f21799608c  ******
-///
+/// try to fix
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
