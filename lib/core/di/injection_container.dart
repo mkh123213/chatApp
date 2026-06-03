@@ -20,7 +20,7 @@ import 'package:chat_material3/features/single_chat/presentation/bloc/messages_c
 import 'package:chat_material3/features/single_chat/presentation/bloc/send_message_cubit/send_message_cubit.dart';
 import 'package:chat_material3/features/single_chat/data/datasources/user_presence_remote_data_source.dart';
 import 'package:chat_material3/features/single_chat/data/repositories/user_presence_repo.dart';
-import 'package:chat_material3/features/single_chat/data/services/user_presence_service.dart';
+import 'package:chat_material3/core/service/user_presence/user_presence_service.dart';
 import 'package:chat_material3/core/app/app_cubit/unread_messages_cubit/unread_messages_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/bloc/user_presence_cubit/user_presence_cubit.dart';
 import 'package:chat_material3/features/main/presentation/bloc/main_cubit.dart';

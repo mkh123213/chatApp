@@ -4,9 +4,10 @@ import 'package:chat_material3/core/common/widgets/chat/message_read_status.dart
 import 'package:chat_material3/core/common/widgets/text_app.dart';
 import 'package:chat_material3/core/extensions/context_extension.dart';
 import 'package:chat_material3/core/language/lang_keys.dart';
+import 'package:chat_material3/features/single_chat/presentation/widgets/voice_message_widget.dart';
 import 'package:flutter/material.dart';
 
-enum ChatMessageType { text, image, file, link }
+enum ChatMessageType { text, image, file, link, voice, sticker, gif }
 
 class ChatMessageBubble extends StatelessWidget {
   const ChatMessageBubble({
@@ -21,8 +22,10 @@ class ChatMessageBubble extends StatelessWidget {
     this.isSelected = false,
     this.senderLabel,
     this.senderInitial,
+    this.senderLabelColor,
     this.onLongPress,
     this.onImageTap,
+    this.onAvatarTap,
     this.selectedColor,
     this.sentBubbleColor,
     this.receivedBubbleColor,
@@ -39,8 +42,10 @@ class ChatMessageBubble extends StatelessWidget {
   final bool isSelected;
   final String? senderLabel;
   final String? senderInitial;
+  final Color? senderLabelColor;
   final VoidCallback? onLongPress;
   final VoidCallback? onImageTap;
+  final VoidCallback? onAvatarTap;
   final Color? selectedColor;
   final Color? sentBubbleColor;
   final Color? receivedBubbleColor;
@@ -62,87 +67,86 @@ class ChatMessageBubble extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (!isMe && senderInitial != null) ...[
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: const Color(0xFFD0DCF8),
-                  child: Text(
-                    senderInitial!,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1A2C6B),
+                GestureDetector(
+                  onTap: onAvatarTap,
+                  child: CircleAvatar(
+                    radius: 16,
+                    backgroundColor: senderLabelColor?.withValues(alpha: 0.2) ??
+                        const Color(0xFFD0DCF8),
+                    child: Text(
+                      senderInitial!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: senderLabelColor ?? const Color(0xFF1A2C6B),
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
               ],
               Flexible(
-                child: Column(
-                  crossAxisAlignment:
-                      isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                  children: [
-                    if (!isMe && senderLabel != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 3),
-                        child: Text(
-                          senderLabel!,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF1A2C6B),
-                          ),
-                        ),
-                      ),
-                    Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(16),
-                          topRight: const Radius.circular(16),
-                          bottomLeft: Radius.circular(isMe ? 16 : 0),
-                          bottomRight: Radius.circular(isMe ? 0 : 16),
-                        ),
-                      ),
-                      color: isMe
-                          ? (sentBubbleColor ?? context.color.primaryFixed)
-                          : (receivedBubbleColor ?? context.color.inputBorder),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildContent(context),
-                            const SizedBox(height: 4),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (isEdited) ...[
-                                  TextApp(
-                                    text: context.translate(LangKeys.edited),
-                                    theme: context.textStyle,
-                                  ),
-                                  const SizedBox(width: 4),
-                                ],
-                                TextApp(
-                                  text: time,
-                                  theme: context.textStyle.copyWith(
-                                    fontSize: 10,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                if (isMe && readStatus != null) ...[
-                                  const SizedBox(width: 4),
-                                  MessageReadStatus(
-                                    status: readStatus!,
-                                    size: 14,
-                                  ),
-                                ],
-                              ],
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: const Radius.circular(16),
+                      topRight: const Radius.circular(16),
+                      bottomLeft: Radius.circular(isMe ? 16 : 0),
+                      bottomRight: Radius.circular(isMe ? 0 : 16),
+                    ),
+                  ),
+                  color: isMe
+                      ? (sentBubbleColor ?? context.color.primaryFixed)
+                      : (receivedBubbleColor ?? context.color.inputBorder),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (!isMe && senderLabel != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Text(
+                              senderLabel!,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: senderLabelColor ??
+                                    const Color(0xFF1A2C6B),
+                              ),
                             ),
+                          ),
+                        _buildContent(context),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (isEdited) ...[
+                              TextApp(
+                                text: context.translate(LangKeys.edited),
+                                theme: context.textStyle,
+                              ),
+                              const SizedBox(width: 4),
+                            ],
+                            TextApp(
+                              text: time,
+                              theme: context.textStyle.copyWith(
+                                fontSize: 10,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            if (isMe && readStatus != null) ...[
+                              const SizedBox(width: 4),
+                              MessageReadStatus(
+                                status: readStatus!,
+                                size: 14,
+                              ),
+                            ],
                           ],
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],
@@ -190,6 +194,29 @@ class ChatMessageBubble extends StatelessWidget {
               TextApp(text: text, theme: context.textStyle),
             ],
           ],
+        );
+      case ChatMessageType.voice:
+        return VoiceMessageWidget(
+          mediaUrl: mediaUrl ?? '',
+          durationSeconds: int.tryParse(text) ?? 0,
+          isMe: isMe,
+        );
+      case ChatMessageType.sticker:
+        return Center(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 64),
+          ),
+        );
+      case ChatMessageType.gif:
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            mediaUrl ?? '',
+            width: 200,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+          ),
         );
       default:
         return TextApp(

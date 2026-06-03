@@ -4,7 +4,7 @@ import 'package:chat_material3/core/service/network/api_result.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:chat_material3/core/app/upload_image/repo/upload_image_repo.dart';
-import 'package:chat_material3/core/utils/image_pick.dart';
+import 'package:chat_material3/core/service/image_picker/pick_image_utils.dart';
 
 part 'upload_image_cubit.freezed.dart';
 part 'upload_image_state.dart';

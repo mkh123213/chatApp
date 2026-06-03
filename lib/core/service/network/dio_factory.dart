@@ -1,3 +1,7 @@
+// REUSABLE SERVICE: Dio HTTP client factory with auth interceptor.
+// REQUIRES: dio, dio/io, pretty_dio_logger packages in pubspec.yaml
+// CHANGE: Update PrefKeys.accessToken to your project's token key.
+// CHANGE: Update the 401/400 error handling (AppLogout) to your project's logout logic.
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:dio/dio.dart';

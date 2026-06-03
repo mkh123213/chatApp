@@ -50,12 +50,7 @@ class _SingleChatScreenState extends State<SingleChatScreen> {
   Widget build(BuildContext context) {
     final chat = widget.chat;
     final currentUser = getCurrentUser();
-    final currentUserEmail = currentUser.email ?? '';
     final currentUserId = currentUser.uid;
-    final friendEmail = chat.usersEmails
-            ?.where((e) => e.toLowerCase() != currentUserEmail.toLowerCase())
-            .firstOrNull ??
-        '';
     final friendId =
         chat.users.where((id) => id != currentUserId).firstOrNull ?? '';
 
@@ -143,7 +138,7 @@ class _SingleChatScreenState extends State<SingleChatScreen> {
                   children: [
                     _SingleChatHeader(
                       chat: chat,
-                      friendEmail: friendEmail,
+                      friendDisplayName: _getFriendDisplayName(chat),
                       friendId: friendId,
                     ),
                     Expanded(
@@ -208,6 +203,31 @@ class _SingleChatScreenState extends State<SingleChatScreen> {
                                           caption: caption,
                                         );
                                   },
+                                  onSendVoice: (File voiceFile, Duration duration) {
+                                    context
+                                        .read<SendMessageCubit>()
+                                        .sendVoiceMessage(
+                                          chat: chat,
+                                          voiceFile: voiceFile,
+                                          duration: duration,
+                                        );
+                                  },
+                                  onSendSticker: (String sticker) {
+                                    context
+                                        .read<SendMessageCubit>()
+                                        .sendStickerMessage(
+                                          chat: chat,
+                                          sticker: sticker,
+                                        );
+                                  },
+                                  onSendGif: (String gifUrl) {
+                                    context
+                                        .read<SendMessageCubit>()
+                                        .sendGifMessage(
+                                          chat: chat,
+                                          gifUrl: gifUrl,
+                                        );
+                                  },
                                 );
                               },
                             ),
@@ -222,15 +242,33 @@ class _SingleChatScreenState extends State<SingleChatScreen> {
   }
 }
 
+String _getFriendDisplayName(ChatModel chat) {
+  final currentUser = getCurrentUser();
+  final currentUserId = currentUser.uid;
+  final currentUserEmail = currentUser.email ?? '';
+
+  final userIndex = chat.users.indexOf(currentUserId);
+  if (chat.usersNames != null && chat.usersNames!.length >= 2) {
+    final friendIndex = userIndex == 0 ? 1 : 0;
+    final friendName = chat.usersNames![friendIndex];
+    if (friendName.isNotEmpty) return friendName;
+  }
+
+  return chat.usersEmails
+          ?.where((e) => e.toLowerCase() != currentUserEmail.toLowerCase())
+          .firstOrNull ??
+      '';
+}
+
 class _SingleChatHeader extends StatelessWidget {
   const _SingleChatHeader({
     required this.chat,
-    required this.friendEmail,
+    required this.friendDisplayName,
     required this.friendId,
   });
 
   final ChatModel chat;
-  final String friendEmail;
+  final String friendDisplayName;
   final String friendId;
 
   @override
@@ -276,10 +314,22 @@ class _SingleChatHeader extends StatelessWidget {
             );
 
             return ChatAppBar(
-              title: friendEmail,
+              title: friendDisplayName,
               subtitle: isBlocked
                   ? null
                   : (friendId.isNotEmpty ? const UserPresenceStatus() : null),
+              onTitleTap: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.contactInfo,
+                  arguments: {
+                    'chat': chat,
+                    'friendDisplayName': friendDisplayName,
+                    'friendId': friendId,
+                    'blockCubit': context.read<BlockCubit>(),
+                  },
+                );
+              },
               actions: [
                 if (!isBlocked) ...[
                   IconButton(

@@ -105,7 +105,11 @@ class _GroupChatHeader extends StatelessWidget {
           onPressed: () {},
         ),
         IconButton(
-          icon: Icon(Icons.search, color: context.color.onSurface),
+          icon: Icon(Icons.call_outlined, color: context.color.onSurface),
+          onPressed: () {},
+        ),
+        IconButton(
+          icon: Icon(Icons.more_vert, color: context.color.onSurface),
           onPressed: () {},
         ),
       ],

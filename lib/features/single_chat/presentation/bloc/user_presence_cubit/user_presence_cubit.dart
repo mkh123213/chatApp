@@ -33,9 +33,9 @@ class UserPresenceCubit extends Cubit<UserPresenceState> {
           } else if (lastSeenRaw is String) {
             lastSeen = DateTime.tryParse(lastSeenRaw);
           }
-          emit(UserPresenceState.offline(
-            lastSeen: lastSeen ?? DateTime.now(),
-          ));
+          if (lastSeen != null) {
+            emit(UserPresenceState.offline(lastSeen: lastSeen));
+          }
         }
       },
       onError: (error) {

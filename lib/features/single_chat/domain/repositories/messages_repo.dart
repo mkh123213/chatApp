@@ -32,6 +32,31 @@ abstract class MessagesRepo {
     String caption = '',
   });
 
+  Future<void> sendVoiceMessage({
+    required String chatId,
+    required String senderId,
+    required String senderEmail,
+    required String receiverId,
+    required File voiceFile,
+    required Duration duration,
+  });
+
+  Future<void> sendStickerMessage({
+    required String chatId,
+    required String senderId,
+    required String senderEmail,
+    required String receiverId,
+    required String sticker,
+  });
+
+  Future<void> sendGifMessage({
+    required String chatId,
+    required String senderId,
+    required String senderEmail,
+    required String receiverId,
+    required String gifUrl,
+  });
+
   Future<void> updateMessage({
     required String chatId,
     required String messageId,
@@ -47,5 +72,10 @@ abstract class MessagesRepo {
   Future<void> markMessagesAsRead({
     required String chatId,
     required String currentUserId,
+  });
+
+  Future<void> markMessagesByIdsAsRead({
+    required String chatId,
+    required List<String> messageIds,
   });
 }

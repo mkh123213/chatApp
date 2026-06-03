@@ -8,7 +8,6 @@ import 'package:chat_material3/features/groups/presentation/refactor/groups_chat
 import 'package:chat_material3/features/groups/presentation/widgets/create_group_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:iconsax/iconsax.dart';
 
 class GroupsChatScreen extends StatefulWidget {
   const GroupsChatScreen({super.key});
@@ -25,7 +24,7 @@ class _GroupsChatScreenState extends State<GroupsChatScreen> {
       widget: CustomFadeInDown(
         duration: 500,
         child: BlocProvider(
-          create: (context) => sl<CreateGroupCubit>(),
+          create: (_) => sl<CreateGroupCubit>(),
           child: const CreateGroupBottomSheet(),
         ),
       ),
@@ -46,7 +45,7 @@ class _GroupsChatScreenState extends State<GroupsChatScreen> {
               duration: 300,
               child: FloatingActionButton(
                 onPressed: _showCreateGroupBottomSheet,
-                child: const Icon(Iconsax.add),
+                child: const Icon(Icons.group_add),
               ),
             ),
           ),

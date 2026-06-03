@@ -13,22 +13,25 @@ class EmptyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-      child: Opacity(
-        opacity: 0.6,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(Assets.assetsImagesCoreEmptyScreen),
-            TextApp(
-              text: title!,
-              theme: context.textStyle.copyWith(
-                fontSize: 16.sp,
-                fontWeight: FontWeightHelper.medium,
+    return Center(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+        child: Opacity(
+          opacity: 0.6,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(Assets.assetsImagesCoreEmptyScreen),
+              TextApp(
+                text: title!,
+                theme: context.textStyle.copyWith(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeightHelper.medium,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

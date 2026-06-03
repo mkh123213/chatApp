@@ -1,5 +1,7 @@
 import 'package:chat_material3/core/common/widgets/app_back_button.dart';
+import 'package:chat_material3/core/extensions/context_extension.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ChatAppBar extends StatelessWidget {
   const ChatAppBar({
@@ -19,18 +21,18 @@ class ChatAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final displayAvatar = avatar ?? _DefaultAvatar(name: title);
+
     return SafeArea(
       bottom: false,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 6.h),
         child: Row(
           children: [
             const AppBackButton(),
-            if (avatar != null) ...[
-              const SizedBox(width: 8),
-              avatar!,
-            ],
-            const SizedBox(width: 8),
+            SizedBox(width: 4.w),
+            displayAvatar,
+            SizedBox(width: 10.w),
             Expanded(
               child: GestureDetector(
                 onTap: onTitleTap,
@@ -38,14 +40,26 @@ class ChatAppBar extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 4.w),
+                        Icon(
+                          Icons.lock_outline,
+                          size: 14.sp,
+                          color: context.color.onSurfaceVariant,
+                        ),
+                      ],
                     ),
                     if (subtitle != null) subtitle!,
                   ],
@@ -54,6 +68,52 @@ class ChatAppBar extends StatelessWidget {
             ),
             if (actions != null) ...actions!,
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DefaultAvatar extends StatelessWidget {
+  const _DefaultAvatar({required this.name});
+
+  final String name;
+
+  static const List<Color> _colors = [
+    Color(0xFF26A69A),
+    Color(0xFF42A5F5),
+    Color(0xFFEF5350),
+    Color(0xFFFFA726),
+    Color(0xFFAB47BC),
+    Color(0xFF66BB6A),
+    Color(0xFFEC407A),
+    Color(0xFF8D6E63),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final hash = name.codeUnits.fold<int>(0, (prev, c) => prev + c);
+    final color = _colors[hash % _colors.length];
+    final parts = name.split('@').first.split(RegExp(r'[._\-]'));
+    String initials;
+    if (parts.length >= 2) {
+      initials = '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    } else {
+      final n = parts.first;
+      initials = n.length >= 2
+          ? '${n[0]}${n[1]}'.toUpperCase()
+          : n[0].toUpperCase();
+    }
+
+    return CircleAvatar(
+      radius: 20.r,
+      backgroundColor: color,
+      child: Text(
+        initials,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

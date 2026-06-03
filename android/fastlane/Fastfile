@@ -17,7 +17,7 @@ platform :android do
         firebase_cli_token: token,
         android_artifact_type: "APK",
         
-        android_artifact_path: "../build/app/outputs/flutter-apk/app-armeabi-v7a-production-release",
+        android_artifact_path: "../build/app/outputs/flutter-apk/app-armeabi-v7a-production-release.apk",
         
         testers: "mohammadwork199700@gmail.com",
         release_notes: "Testing something with GitHub Actions, trying to push directly from master branch",

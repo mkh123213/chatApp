@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:chat_material3/constants/agora_constants.dart';
 import 'package:chat_material3/core/di/injection_container.dart';
 import 'package:chat_material3/core/helper_functions/get_current_user.dart';
+import 'package:chat_material3/core/service/call_service/agora_token_service.dart';
 import 'package:chat_material3/core/service/call_service/call_provider_service.dart';
 import 'package:chat_material3/features/calls/data/models/call_model.dart';
 import 'package:chat_material3/features/calls/data/models/call_status.dart';
@@ -75,7 +75,10 @@ class _CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
 
   Future<void> _initializeCall() async {
     final isVideo = widget.call.type == CallType.video;
-    final permissions = <Permission>[Permission.microphone];
+    final permissions = <Permission>[
+      Permission.microphone,
+      Permission.bluetoothConnect,
+    ];
     if (isVideo) permissions.add(Permission.camera);
 
     final statuses = await permissions.request();
@@ -95,11 +98,19 @@ class _CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
       return;
     }
 
+    final uid = _stableUidHash(getCurrentUser().uid);
+    final channelId = widget.call.channelId;
+    final tokenService = AgoraTokenService();
+    final token = await tokenService.generateToken(
+      channelName: channelId,
+      uid: uid,
+    );
+
     await _callProvider.initialize();
     await _callProvider.joinChannel(
-      channelId: widget.call.channelId,
-      token: agoraToken,
-      uid: getCurrentUser().uid.hashCode,
+      channelId: channelId,
+      token: token,
+      uid: uid,
       isVideo: isVideo,
     );
 
@@ -128,6 +139,16 @@ class _CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
         }
       });
     }
+  }
+
+  // FNV-1a 32-bit hash — deterministic across all devices unlike String.hashCode
+  static int _stableUidHash(String s) {
+    var hash = 0x811c9dc5;
+    for (var i = 0; i < s.length; i++) {
+      hash ^= s.codeUnitAt(i);
+      hash = (hash * 0x01000193) & 0x7FFFFFFF;
+    }
+    return hash;
   }
 
   @override

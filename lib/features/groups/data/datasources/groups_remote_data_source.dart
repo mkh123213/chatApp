@@ -194,7 +194,6 @@ class GroupsRemoteDataSourceImpl implements GroupsRemoteDataSource {
       },
     );
 
-    // Send notifications to group members
     final groupDoc = await FirebaseFirestore.instance
         .doc('$groupsCollection/$groupId')
         .get();

@@ -1,5 +1,4 @@
 import 'package:chat_material3/core/common/widgets/chat/message_read_status.dart';
-import 'package:chat_material3/core/common/widgets/text_app.dart';
 import 'package:chat_material3/core/extensions/context_extension.dart';
 import 'package:chat_material3/features/groups/data/models/group_message_model.dart';
 import 'package:flutter/material.dart';
@@ -22,15 +21,23 @@ class GroupMessageBubble extends StatelessWidget {
   final bool isSelected;
   final int totalMembers;
 
+  static const _senderColors = [
+    Color(0xFFEF5350),
+    Color(0xFF42A5F5),
+    Color(0xFF66BB6A),
+    Color(0xFFFFA726),
+    Color(0xFFAB47BC),
+    Color(0xFF26C6DA),
+    Color(0xFFEC407A),
+    Color(0xFF00897B),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final isMe = message.senderId == currentUserId;
     final time = message.createdAt != null
         ? DateFormat('h:mm a').format(message.createdAt!)
         : '';
-    final initial = message.senderEmail.isNotEmpty
-        ? message.senderEmail[0].toUpperCase()
-        : '?';
 
     Widget bubble;
     if (isMe) {
@@ -41,10 +48,16 @@ class GroupMessageBubble extends StatelessWidget {
         totalMembers: totalMembers,
       );
     } else {
+      final hash =
+          message.senderId.codeUnits.fold<int>(0, (prev, c) => prev + c);
+      final senderColor = _senderColors[hash % _senderColors.length];
+      final senderName = _getSenderDisplayName();
+
       bubble = _ReceivedBubble(
         message: message,
         time: time,
-        initial: initial,
+        senderName: senderName,
+        senderColor: senderColor,
         onLongPress: onLongPress,
       );
     }
@@ -57,11 +70,18 @@ class GroupMessageBubble extends StatelessWidget {
     }
     return bubble;
   }
+
+  String _getSenderDisplayName() {
+    final email = message.senderEmail;
+    if (email.contains('@')) {
+      return email.split('@').first;
+    }
+    return email.isNotEmpty ? email : '?';
+  }
 }
 
-// ---------- content builder ----------
-
-Widget _buildContent(BuildContext context, GroupMessageModel message) {
+Widget _buildContent(BuildContext context, GroupMessageModel message,
+    {required Color textColor}) {
   if (message.type == GroupMessageType.image &&
       message.fileUrl != null &&
       message.fileUrl!.isNotEmpty) {
@@ -95,9 +115,13 @@ Widget _buildContent(BuildContext context, GroupMessageModel message) {
       ? message.text
       : (message.fileUrl ?? message.fileName ?? '');
 
-  return TextApp(
-    text: displayText,
-    theme: context.textStyle,
+  return Text(
+    displayText,
+    style: TextStyle(
+      fontSize: 14.sp,
+      color: textColor,
+      height: 1.4,
+    ),
   );
 }
 
@@ -126,8 +150,6 @@ void _openImageViewer(BuildContext context, String url) {
     ),
   );
 }
-
-// ---------- sent ----------
 
 class _SentBubble extends StatelessWidget {
   const _SentBubble({
@@ -161,7 +183,7 @@ class _SentBubble extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isImage
                     ? Colors.transparent
-                    : context.color.primary,
+                    : context.color.primary.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(16.r),
                   topRight: Radius.circular(16.r),
@@ -169,14 +191,8 @@ class _SentBubble extends StatelessWidget {
                   bottomRight: Radius.circular(4.r),
                 ),
               ),
-              child: DefaultTextStyle(
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: context.color.onPrimary,
-                  height: 1.4,
-                ),
-                child: _buildContent(context, message),
-              ),
+              child: _buildContent(context, message,
+                  textColor: context.color.onSurface),
             ),
             SizedBox(height: 3.h),
             Row(
@@ -204,19 +220,19 @@ class _SentBubble extends StatelessWidget {
   }
 }
 
-// ---------- received ----------
-
 class _ReceivedBubble extends StatelessWidget {
   const _ReceivedBubble({
     required this.message,
     required this.time,
-    required this.initial,
+    required this.senderName,
+    required this.senderColor,
     required this.onLongPress,
   });
 
   final GroupMessageModel message;
   final String time;
-  final String initial;
+  final String senderName;
+  final Color senderColor;
   final VoidCallback onLongPress;
 
   @override
@@ -228,69 +244,41 @@ class _ReceivedBubble extends StatelessWidget {
       child: Padding(
         padding:
             EdgeInsets.only(left: 14.w, right: 60.w, top: 4.h, bottom: 4.h),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircleAvatar(
-              radius: 16.r,
-              backgroundColor: context.color.secondaryContainer,
-              child: Text(
-                initial,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.bold,
-                  color: context.color.primary,
-                ),
+            Text(
+              senderName,
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+                color: senderColor,
               ),
             ),
-            SizedBox(width: 8.w),
-            Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    message.senderEmail,
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w600,
-                      color: context.color.primary,
-                    ),
-                  ),
-                  SizedBox(height: 3.h),
-                  Container(
-                    padding: isImage
-                        ? EdgeInsets.zero
-                        : EdgeInsets.symmetric(
-                            horizontal: 14.w, vertical: 10.h),
-                    decoration: BoxDecoration(
-                      color: isImage
-                          ? Colors.transparent
-                          : context.color.surfaceVariant,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(4.r),
-                        topRight: Radius.circular(16.r),
-                        bottomLeft: Radius.circular(16.r),
-                        bottomRight: Radius.circular(16.r),
-                      ),
-                    ),
-                    child: DefaultTextStyle(
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        color: context.color.onSurface,
-                        height: 1.4,
-                      ),
-                      child: _buildContent(context, message),
-                    ),
-                  ),
-                  SizedBox(height: 3.h),
-                  Text(
-                    time,
-                    style: TextStyle(
-                        fontSize: 10.sp,
-                        color: context.color.onSurfaceVariant),
-                  ),
-                ],
+            SizedBox(height: 2.h),
+            Container(
+              padding: isImage
+                  ? EdgeInsets.zero
+                  : EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+              decoration: BoxDecoration(
+                color: isImage
+                    ? Colors.transparent
+                    : context.color.surfaceContainerHighest,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(4.r),
+                  topRight: Radius.circular(16.r),
+                  bottomLeft: Radius.circular(16.r),
+                  bottomRight: Radius.circular(16.r),
+                ),
               ),
+              child: _buildContent(context, message,
+                  textColor: context.color.onSurface),
+            ),
+            SizedBox(height: 3.h),
+            Text(
+              time,
+              style: TextStyle(
+                  fontSize: 10.sp, color: context.color.onSurfaceVariant),
             ),
           ],
         ),

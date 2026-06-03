@@ -222,10 +222,32 @@ class LangKeys {
   static const String continuo = 'continuo';
   static const String status = 'status';
   static const String invalidPassword = 'invalid_password';
+  static const String deleteChat = 'delete_chat';
+  static const String deleteChatConfirm = 'delete_chat_confirm';
+  static const String chatDeletedSuccessfully = 'chat_deleted_successfully';
 
   // Sign up feature
+  // New chat screen
+  static const String newChat = 'new_chat';
+  static const String contacts = 'contacts';
+  static const String searchUsers = 'search_users';
+  static const String contactPermissionRequired = 'contact_permission_required';
+  static const String grantPermission = 'grant_permission';
+  static const String noContactsFound = 'no_contacts_found';
+  static const String contactsOnApp = 'contacts_on_app';
+  static const String inviteToApp = 'invite_to_app';
+  static const String invite = 'invite';
+  static const String inviteMessage = 'invite_message';
+  static const String searchByNameEmailPhone = 'search_by_name_email_phone';
+  static const String searchForUsers = 'search_for_users';
+
   static const String createAccount = 'create_account';
   static const String accountCreatedSuccessfully =
       'account_created_successfully';
   static const String alreadyHaveAccount = 'already_have_account';
+
+  static const String contactInfo = 'contact_info';
+  static const String mediaLinksAndDocs = 'media_links_and_docs';
+  static const String muteNotificationsSubtitle = 'mute_notifications_subtitle';
+  static const String encryptionSubtitle = 'encryption_subtitle';
 }
