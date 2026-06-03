@@ -1,0 +1,13 @@
+﻿Running Gradle task 'assembleDebug'...                              6.6s
+flutter : Gradle build failed to produce an .apk file. It's 
+likely that this file was generated under 
+C:\ChatAppUiMaterial3-main\build, but the tool couldn't find it.
+At line:1 char:42
++ ... on C:\ChatAppUiMaterial3-main; flutter build apk --debug 
+2>&1 | Out-F ...
++                                    
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Gradle build fa... 
+   uldn't find it.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
