@@ -34,7 +34,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await EnvVariable.instance.init(envType: EnvTypeEnum.dev);
-
+// 
   //  "current_key": "AIzaSyBDzognjD6pwp6oKKOoEkklgOunZo3W-fs" ==> apiKey
   //  "mobilesdk_app_id": "1:255535904497:android:bf1c974c2689a199431b50" ==> appId
   // "project_number": "255535904497" ==> messagingSenderId
