@@ -27,12 +27,13 @@ class _LoginScreenState extends State<LoginScreen> {
     final authCubit = context.read<AuthCubit>();
 
     return Scaffold(
-      appBar: AppBar(),
-      body: LogInForm(
-        formKey: formKey,
-        emailCon: emailCon,
-        passCon: passCon,
-        authCubit: authCubit,
+      body: SafeArea(
+        child: LogInForm(
+          formKey: formKey,
+          emailCon: emailCon,
+          passCon: passCon,
+          authCubit: authCubit,
+        ),
       ),
     );
   }

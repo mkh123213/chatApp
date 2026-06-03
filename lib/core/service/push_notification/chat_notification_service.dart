@@ -130,8 +130,12 @@ class ChatNotificationService {
       final fcmToken = data['fcmToken'] as String?;
       if (fcmToken == null || fcmToken.isEmpty) return;
 
+      final callTypeLabel = callType == 'video' ? 'Video' : 'Audio';
+
       await _sendViaEdgeFunction(
         token: fcmToken,
+        title: '$callerName',
+        body: 'Incoming $callTypeLabel Call',
         data: {
           'route': 'call',
           'callId': callId,
@@ -139,7 +143,7 @@ class ChatNotificationService {
           'callerPhotoUrl': callerPhotoUrl,
           'callType': callType,
         },
-        dataOnly: true,
+        priority: 'high',
       );
     } catch (e) {
       debugPrint('Failed to send call notification: $e');
@@ -152,6 +156,7 @@ class ChatNotificationService {
     String? body,
     required Map<String, String> data,
     bool dataOnly = false,
+    String? priority,
   }) async {
     try {
       await Supabase.instance.client.functions.invoke(
@@ -162,6 +167,7 @@ class ChatNotificationService {
           if (body != null) 'body': body,
           'data': data,
           'dataOnly': dataOnly,
+          if (priority != null) 'priority': priority,
         },
       );
     } catch (e) {

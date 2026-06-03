@@ -20,6 +20,12 @@ ChatModel _$ChatModelFromJson(Map<String, dynamic> json) => ChatModel(
       lastMessageTime: ChatModel._dateTimeFromJson(json['lastMessageTime']),
       createdAt: ChatModel._dateTimeFromJson(json['createdAt']),
       updatedAt: ChatModel._dateTimeFromJson(json['updatedAt']),
+      pinnedBy: (json['pinnedBy'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      archivedBy: (json['archivedBy'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
     );
 
 Map<String, dynamic> _$ChatModelToJson(ChatModel instance) => <String, dynamic>{
@@ -32,4 +38,6 @@ Map<String, dynamic> _$ChatModelToJson(ChatModel instance) => <String, dynamic>{
       'lastMessageTime': ChatModel._dateTimeToJson(instance.lastMessageTime),
       'createdAt': ChatModel._dateTimeToJson(instance.createdAt),
       'updatedAt': ChatModel._dateTimeToJson(instance.updatedAt),
+      'pinnedBy': instance.pinnedBy,
+      'archivedBy': instance.archivedBy,
     };

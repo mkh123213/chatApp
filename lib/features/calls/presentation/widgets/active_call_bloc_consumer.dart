@@ -18,10 +18,7 @@ class ActiveCallBlocConsumer extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<ActiveCallCubit, ActiveCallState>(
       listener: (context, state) {
-        if (state is ActiveCallEnded) {
-          context.read<ActiveCallCubit>().leaveChannel();
-          Navigator.of(context).pop();
-        } else if (state is ActiveCallError) {
+        if (state is ActiveCallError) {
           ShowToast.showToastErrorTop(message: state.message);
         }
       },
@@ -59,15 +56,19 @@ class ActiveCallBlocConsumer extends StatelessWidget {
                 CallControls(
               call: call,
               onEndCall: () {
-                final duration = call.acceptedAt != null
-                    ? DateTime.now()
-                        .difference(call.acceptedAt!)
-                        .inSeconds
-                    : 0;
-                context.read<ActiveCallCubit>().endCall(
-                      call: call,
-                      durationInSeconds: duration,
-                    );
+                if (call.status == CallStatus.ringing) {
+                  context.read<ActiveCallCubit>().missCall(call: call);
+                } else {
+                  final duration = call.acceptedAt != null
+                      ? DateTime.now()
+                          .difference(call.acceptedAt!)
+                          .inSeconds
+                      : 0;
+                  context.read<ActiveCallCubit>().endCall(
+                        call: call,
+                        durationInSeconds: duration,
+                      );
+                }
               },
             ),
               ],

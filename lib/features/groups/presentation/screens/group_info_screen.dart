@@ -1,5 +1,6 @@
 import 'package:chat_material3/core/common/toast/show_toast.dart';
 import 'package:chat_material3/core/common/widgets/app_back_button.dart';
+import 'package:chat_material3/core/common/widgets/user_avatar.dart';
 import 'package:chat_material3/core/di/injection_container.dart';
 import 'package:chat_material3/core/extensions/context_extension.dart';
 import 'package:chat_material3/core/helper_functions/get_current_user.dart';
@@ -600,7 +601,6 @@ class _MemberRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initial = email.isNotEmpty ? email[0].toUpperCase() : '?';
     final displayName = isCurrentUser ? 'You' : email;
 
     return InkWell(
@@ -610,17 +610,11 @@ class _MemberRow extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 8.h),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 22.r,
-              backgroundColor: context.color.secondaryContainer,
-              child: Text(
-                initial,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: context.color.primary,
-                ),
-              ),
+            UserAvatar(
+              userId: uid,
+              displayName: email,
+              radius: 22,
+              fontSize: 16,
             ),
             SizedBox(width: 12.w),
             Expanded(

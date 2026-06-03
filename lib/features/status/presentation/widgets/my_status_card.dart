@@ -1,11 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_material3/core/common/toast/show_toast.dart';
-import 'package:chat_material3/core/common/widgets/text_app.dart';
 import 'package:chat_material3/core/extensions/context_extension.dart';
 import 'package:chat_material3/core/helper_functions/get_current_user.dart';
 import 'package:chat_material3/core/language/lang_keys.dart';
 import 'package:chat_material3/core/routes/app_routes.dart';
-import 'package:chat_material3/core/style/fonts/font_weight_helper.dart';
 import 'package:chat_material3/features/status/presentation/bloc/my_status_cubit/my_status_cubit.dart';
 import 'package:chat_material3/features/status/presentation/widgets/create_status_bottom_sheet.dart';
 import 'package:flutter/material.dart';
@@ -32,12 +30,11 @@ class MyStatusCard extends StatelessWidget {
         return state.maybeWhen(
           loaded: (mine) {
             final user = getCurrentUser();
-            final count = mine.length;
-            return _MyStatusContainer(
+            final latest = mine.isNotEmpty ? mine.first.createdAt : null;
+            return _MyStatusTile(
               photoUrl: user.photoUrl,
               title: context.translate(LangKeys.statusMyStatus),
-              subtitle:
-                  '$count ${context.translate(LangKeys.statusUpdatesCount)}',
+              subtitle: latest != null ? _relativeTime(latest) : '',
               onTap: () => context.pushName(
                 AppRoutes.statusViewer,
                 arguments: {
@@ -50,7 +47,7 @@ class MyStatusCard extends StatelessWidget {
           },
           empty: () {
             final user = getCurrentUser();
-            return _MyStatusContainer(
+            return _MyStatusTile(
               photoUrl: user.photoUrl,
               title: context.translate(LangKeys.statusMyStatus),
               subtitle: context.translate(LangKeys.statusTapToAdd),
@@ -62,10 +59,18 @@ class MyStatusCard extends StatelessWidget {
       },
     );
   }
+
+  static String _relativeTime(DateTime time) {
+    final diff = DateTime.now().difference(time);
+    if (diff.inMinutes < 1) return 'just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    return '${diff.inDays}d ago';
+  }
 }
 
-class _MyStatusContainer extends StatelessWidget {
-  const _MyStatusContainer({
+class _MyStatusTile extends StatelessWidget {
+  const _MyStatusTile({
     required this.photoUrl,
     required this.title,
     required this.subtitle,
@@ -79,44 +84,24 @@ class _MyStatusContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-        decoration: BoxDecoration(
-          color: context.color.onSurface.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(16.r),
-        ),
-        child: Row(
-          children: [
-            _MyStatusAvatar(photoUrl: photoUrl),
-            SizedBox(width: 14.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextApp(
-                    text: title,
-                    theme: context.textStyle.copyWith(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeightHelper.semiBold,
-                      color: context.color.onSurface,
-                    ),
-                  ),
-                  SizedBox(height: 2.h),
-                  TextApp(
-                    text: subtitle,
-                    theme: context.textStyle.copyWith(
-                      fontSize: 12.sp,
-                      color: context.color.onSurface.withValues(alpha: 0.55),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+    return ListTile(
+      contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+      leading: _MyStatusAvatar(photoUrl: photoUrl),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 15.sp,
+          fontWeight: FontWeight.w600,
         ),
       ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          fontSize: 13.sp,
+          color: context.color.onSurfaceVariant,
+        ),
+      ),
+      onTap: onTap,
     );
   }
 }
@@ -129,6 +114,7 @@ class _MyStatusAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
+      clipBehavior: Clip.none,
       children: [
         Container(
           width: 52.w,
@@ -148,8 +134,8 @@ class _MyStatusAvatar extends StatelessWidget {
           ),
         ),
         Positioned(
-          bottom: 0,
-          right: 0,
+          bottom: -2,
+          right: -2,
           child: Container(
             width: 20.w,
             height: 20.w,

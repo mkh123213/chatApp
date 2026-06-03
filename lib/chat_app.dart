@@ -73,7 +73,7 @@ class ChatApp extends StatelessWidget {
                     },
                     navigatorKey: sl<GlobalKey<NavigatorState>>(),
                     onGenerateRoute: AppRoutes.onGenerateRoute,
-                    initialRoute: AppRoutes.mainScreen,
+                    initialRoute: AppRoutes.splash,
                   );
                 },
               ),

@@ -16,6 +16,11 @@ abstract class ChatsRepo {
     required String currentUserId,
     required String searchText,
   });
+
+  Future<void> pinChat({required String chatId, required String userId});
+  Future<void> unpinChat({required String chatId, required String userId});
+  Future<void> archiveChat({required String chatId, required String userId});
+  Future<void> unarchiveChat({required String chatId, required String userId});
 }
 
 class ChatsRepoImpl implements ChatsRepo {
@@ -57,5 +62,25 @@ class ChatsRepoImpl implements ChatsRepo {
       currentUserId: currentUserId,
       searchText: searchText,
     );
+  }
+
+  @override
+  Future<void> pinChat({required String chatId, required String userId}) {
+    return _chatsRemoteDataSource.pinChat(chatId: chatId, userId: userId);
+  }
+
+  @override
+  Future<void> unpinChat({required String chatId, required String userId}) {
+    return _chatsRemoteDataSource.unpinChat(chatId: chatId, userId: userId);
+  }
+
+  @override
+  Future<void> archiveChat({required String chatId, required String userId}) {
+    return _chatsRemoteDataSource.archiveChat(chatId: chatId, userId: userId);
+  }
+
+  @override
+  Future<void> unarchiveChat({required String chatId, required String userId}) {
+    return _chatsRemoteDataSource.unarchiveChat(chatId: chatId, userId: userId);
   }
 }

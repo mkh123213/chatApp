@@ -19,6 +19,11 @@ abstract class ChatsRemoteDataSource {
     required String currentUserId,
     required String searchText,
   });
+
+  Future<void> pinChat({required String chatId, required String userId});
+  Future<void> unpinChat({required String chatId, required String userId});
+  Future<void> archiveChat({required String chatId, required String userId});
+  Future<void> unarchiveChat({required String chatId, required String userId});
 }
 
 class ChatsRemoteDataSourceImpl implements ChatsRemoteDataSource {
@@ -153,6 +158,34 @@ class ChatsRemoteDataSourceImpl implements ChatsRemoteDataSource {
             chat.usersEmails?.map((e) => e.toLowerCase()).toList() ?? [];
         return usersEmails.any((email) => email.contains(cleanedSearchText));
       }).toList();
+    });
+  }
+
+  @override
+  Future<void> pinChat({required String chatId, required String userId}) async {
+    await FirebaseFirestore.instance.collection(chatsCollection).doc(chatId).update({
+      'pinnedBy': FieldValue.arrayUnion([userId]),
+    });
+  }
+
+  @override
+  Future<void> unpinChat({required String chatId, required String userId}) async {
+    await FirebaseFirestore.instance.collection(chatsCollection).doc(chatId).update({
+      'pinnedBy': FieldValue.arrayRemove([userId]),
+    });
+  }
+
+  @override
+  Future<void> archiveChat({required String chatId, required String userId}) async {
+    await FirebaseFirestore.instance.collection(chatsCollection).doc(chatId).update({
+      'archivedBy': FieldValue.arrayUnion([userId]),
+    });
+  }
+
+  @override
+  Future<void> unarchiveChat({required String chatId, required String userId}) async {
+    await FirebaseFirestore.instance.collection(chatsCollection).doc(chatId).update({
+      'archivedBy': FieldValue.arrayRemove([userId]),
     });
   }
 

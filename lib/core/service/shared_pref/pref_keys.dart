@@ -9,4 +9,6 @@ class PrefKeys {
   //fierbase
   static const String currentUser = 'currentUser';
   static const String currentUserUrl = 'currentUserUrl';
+  static const String doNotDisturb = 'doNotDisturb';
+  static const String chatWallpaper = 'chatWallpaper';
 }

@@ -1,6 +1,4 @@
 import 'package:chat_material3/core/app/auth_cubit/auth_cubit.dart';
-import 'package:chat_material3/core/app/upload_image/cubit/upload_image_cubit.dart';
-import 'package:chat_material3/core/di/injection_container.dart';
 import 'package:chat_material3/features/auth/presentation/widgets/sign_up/sign_up_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,9 +33,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final authCubit = context.read<AuthCubit>();
 
     return Scaffold(
-      appBar: AppBar(),
-      body: BlocProvider(
-        create: (context) => sl<UploadImageCubit>(),
+      body: SafeArea(
         child: SignUpForm(
           formKey: formKey,
           nameCon: nameCon,

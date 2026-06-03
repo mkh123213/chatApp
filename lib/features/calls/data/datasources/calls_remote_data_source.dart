@@ -63,9 +63,61 @@ class CallsRemoteDataSourceImpl implements CallsRemoteDataSource {
       queryBuilder: (query) => query
           .where('chatId', isEqualTo: chatId)
           .where('status', whereIn: [CallStatus.ringing, CallStatus.accepted]),
-      builder: (data, documentId) => data,
+      builder: (data, documentId) => {'id': documentId, ...data},
     );
-    return result.isNotEmpty;
+
+    if (result.isEmpty) return false;
+
+    // Auto-clean stale calls that were never properly ended (e.g., app killed,
+    // screen off, network loss). A ringing call older than 60s is considered
+    // stale; an accepted call older than 24h is considered stale.
+    final now = DateTime.now();
+    for (final call in result) {
+      final status = call['status'] as String?;
+      final startedAt = call['startedAt'];
+      DateTime? startTime;
+      if (startedAt is Timestamp) {
+        startTime = startedAt.toDate();
+      }
+
+      if (startTime == null) {
+        await _markCallAsMissed(call['id'] as String);
+        continue;
+      }
+
+      final elapsed = now.difference(startTime);
+      if (status == CallStatus.ringing && elapsed.inSeconds > 60) {
+        await _markCallAsMissed(call['id'] as String);
+      } else if (status == CallStatus.accepted && elapsed.inHours > 24) {
+        await _markCallAsEnded(call['id'] as String);
+      } else {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Future<void> _markCallAsMissed(String callId) async {
+    await _dataBaseService.setData(
+      path: '$callsCollection/$callId',
+      data: {
+        'status': CallStatus.missed,
+        'endedAt': Timestamp.now(),
+        'updatedAt': Timestamp.now(),
+      },
+    );
+  }
+
+  Future<void> _markCallAsEnded(String callId) async {
+    await _dataBaseService.setData(
+      path: '$callsCollection/$callId',
+      data: {
+        'status': CallStatus.ended,
+        'endedAt': Timestamp.now(),
+        'durationInSeconds': 0,
+        'updatedAt': Timestamp.now(),
+      },
+    );
   }
 
   @override

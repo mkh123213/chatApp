@@ -17,6 +17,7 @@ class EnvVariable {
   String _notifcationBaseUrl = '';
   final String _firebaseKey = '';
   final String _buildDeveloper = '';
+  String _geminiApiKey = '';
 
   Future<void> init({required EnvTypeEnum envType}) async {
     switch (envType) {
@@ -31,6 +32,7 @@ class EnvVariable {
     _envType = dotenv.get('ENV_TYPE');
     // CHANGE: Load your project-specific keys here
     _notifcationBaseUrl = dotenv.get('NOTFICATION_BASEURL');
+    _geminiApiKey = dotenv.get('GEMINI_API_KEY', fallback: '');
   }
 
   bool get debugMode => _envType == 'dev';
@@ -38,4 +40,5 @@ class EnvVariable {
   String get notifcationBaseUrl => _notifcationBaseUrl;
   String get firebaseKey => _firebaseKey;
   String get buildDeveloper => _buildDeveloper;
+  String get geminiApiKey => _geminiApiKey;
 }

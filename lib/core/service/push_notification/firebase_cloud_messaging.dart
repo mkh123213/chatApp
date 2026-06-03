@@ -2,6 +2,7 @@
 // REQUIRES: firebase_messaging package in pubspec.yaml
 // CHANGE: Update `subscribeKey` to your project's topic name.
 // CHANGE: Update FirebaseMessagingNavigate import to your project's navigation handler.
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_material3/core/common/toast/show_toast.dart';
@@ -11,6 +12,7 @@ import 'package:chat_material3/core/service/push_notification/firebase_messaging
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
   await FirebaseMessagingNavigate.backGroundHandler(message);
 }
 

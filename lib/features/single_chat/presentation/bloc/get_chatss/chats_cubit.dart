@@ -88,6 +88,38 @@ class ChatsCubit extends Cubit<ChatsState> {
     }
   }
 
+  Future<void> pinChat({required String chatId, required String userId}) async {
+    try {
+      await _chatsRepo.pinChat(chatId: chatId, userId: userId);
+    } catch (e) {
+      emit(ChatsError(message: e.toString()));
+    }
+  }
+
+  Future<void> unpinChat({required String chatId, required String userId}) async {
+    try {
+      await _chatsRepo.unpinChat(chatId: chatId, userId: userId);
+    } catch (e) {
+      emit(ChatsError(message: e.toString()));
+    }
+  }
+
+  Future<void> archiveChat({required String chatId, required String userId}) async {
+    try {
+      await _chatsRepo.archiveChat(chatId: chatId, userId: userId);
+    } catch (e) {
+      emit(ChatsError(message: e.toString()));
+    }
+  }
+
+  Future<void> unarchiveChat({required String chatId, required String userId}) async {
+    try {
+      await _chatsRepo.unarchiveChat(chatId: chatId, userId: userId);
+    } catch (e) {
+      emit(ChatsError(message: e.toString()));
+    }
+  }
+
   void clearSearch() {
     emit(ChatsLoaded(chats: _allChats));
   }

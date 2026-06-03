@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chat_material3/core/service/call_service/callkit_service.dart';
 import 'package:chat_material3/core/di/injection_container.dart';
 import 'package:chat_material3/core/helper_functions/get_current_user.dart';
 import 'package:chat_material3/core/service/call_service/agora_token_service.dart';
@@ -28,6 +29,7 @@ class _CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
   late final CallsRepo _callsRepo;
   late final ActiveCallCubit _activeCallCubit;
   StreamSubscription<int?>? _remoteUserSub;
+  StreamSubscription<ActiveCallState>? _activeCallStateSub;
   Timer? _missedCallTimer;
   bool _callEnded = false;
   bool _remoteUserJoined = false;
@@ -41,9 +43,11 @@ class _CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     _callsRepo = sl<CallsRepo>();
     _activeCallCubit = sl<ActiveCallCubit>()
       ..listenToCall(callId: widget.call.id);
-    _activeCallCubit.stream.listen((state) {
+    _activeCallStateSub = _activeCallCubit.stream.listen((state) {
       if (state is ActiveCallActive) {
         _latestCall = state.call;
+      } else if (state is ActiveCallEnded) {
+        _handleCallEnded();
       }
     });
     _initializeCall();
@@ -51,8 +55,7 @@ class _CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.detached ||
-        state == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.detached) {
       _endCallOnTermination();
     }
   }
@@ -118,15 +121,38 @@ class _CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     _startMissedCallTimerIfCaller();
   }
 
+  void _handleCallEnded() {
+    if (_callEnded) return;
+    _callEnded = true;
+    _callProvider.leaveChannel();
+    CallKitService.instance.endAllCalls();
+    if (mounted) Navigator.of(context).pop();
+  }
+
   void _listenForRemoteUserLeave() {
     _remoteUserSub = _callProvider.onRemoteUserChanged.listen((uid) {
       if (uid != null) {
         _remoteUserJoined = true;
       } else if (_remoteUserJoined && uid == null) {
-        _endCallOnTermination();
-        if (mounted) Navigator.of(context).pop();
+        _endCallIfActive();
       }
     });
+  }
+
+  Future<void> _endCallIfActive() async {
+    if (_callEnded) return;
+    _callEnded = true;
+
+    final call = _latestCall ?? widget.call;
+    if (call.status == CallStatus.accepted) {
+      final duration = call.acceptedAt != null
+          ? DateTime.now().difference(call.acceptedAt!).inSeconds
+          : 0;
+      await _callsRepo.endCall(callId: call.id, durationInSeconds: duration);
+    }
+    _callProvider.leaveChannel();
+    CallKitService.instance.endAllCalls();
+    if (mounted) Navigator.of(context).pop();
   }
 
   void _startMissedCallTimerIfCaller() {
@@ -155,6 +181,7 @@ class _CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _remoteUserSub?.cancel();
+    _activeCallStateSub?.cancel();
     _missedCallTimer?.cancel();
     _endCallOnTermination();
     _callProvider.dispose();

@@ -8,6 +8,7 @@ import 'package:chat_material3/core/helper_functions/get_current_user.dart';
 import 'package:chat_material3/core/language/lang_keys.dart';
 import 'package:chat_material3/core/routes/app_routes.dart';
 import 'package:chat_material3/core/service/push_notification/active_chat_tracker.dart';
+import 'package:chat_material3/core/service/wallpaper/wallpaper_service.dart';
 import 'package:chat_material3/features/calls/presentation/bloc/start_call_cubit/start_call_cubit.dart';
 import 'package:chat_material3/features/calls/presentation/bloc/start_call_cubit/start_call_state.dart';
 import 'package:chat_material3/features/single_chat/data/models/chat_model.dart';
@@ -18,9 +19,11 @@ import 'package:chat_material3/features/single_chat/presentation/bloc/messages_c
 import 'package:chat_material3/features/single_chat/presentation/bloc/send_message_cubit/send_message_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/bloc/send_message_cubit/send_message_state.dart';
 import 'package:chat_material3/core/app/app_cubit/unread_messages_cubit/unread_messages_cubit.dart';
+import 'package:chat_material3/features/single_chat/presentation/bloc/typing_cubit/typing_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/bloc/user_presence_cubit/user_presence_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/widgets/messages_list_view.dart';
 import 'package:chat_material3/features/single_chat/presentation/widgets/user_presence_status.dart';
+import 'package:chat_material3/core/common/widgets/user_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -82,6 +85,9 @@ class _SingleChatScreenState extends State<SingleChatScreen> {
               otherUserId: friendId,
             ),
         ),
+        BlocProvider(
+          create: (_) => sl<TypingCubit>()..watchTyping(chatId: chat.id),
+        ),
       ],
       child: MultiBlocListener(
         listeners: [
@@ -142,14 +148,18 @@ class _SingleChatScreenState extends State<SingleChatScreen> {
                       friendId: friendId,
                     ),
                     Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 5),
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: MessagesListView(chat: chat),
-                            ),
+                      child: ValueListenableBuilder<int>(
+                        valueListenable: WallpaperService().selectedIndex,
+                        builder: (_, __, ___) => Container(
+                          decoration: WallpaperService().decoration,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 5),
+                            child: Column(
+                              children: [
+                                Expanded(
+                                  child: MessagesListView(chat: chat),
+                                ),
                             BlocBuilder<BlockCubit, BlockState>(
                               builder: (context, blockState) {
                                 final isBlocked = blockState.when(
@@ -176,7 +186,17 @@ class _SingleChatScreenState extends State<SingleChatScreen> {
                                   );
                                 }
                                 return ChatMessageInput(
+                                  onTyping: () {
+                                    context.read<TypingCubit>().setTyping(
+                                          chatId: chat.id,
+                                          userId: currentUserId,
+                                        );
+                                  },
                                   onSendText: (text) {
+                                    context.read<TypingCubit>().clearTyping(
+                                          chatId: chat.id,
+                                          userId: currentUserId,
+                                        );
                                     context
                                         .read<SendMessageCubit>()
                                         .sendTextMessage(
@@ -231,7 +251,9 @@ class _SingleChatScreenState extends State<SingleChatScreen> {
                                 );
                               },
                             ),
-                          ],
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -315,9 +337,15 @@ class _SingleChatHeader extends StatelessWidget {
 
             return ChatAppBar(
               title: friendDisplayName,
+              avatar: UserAvatar(
+                userId: friendId,
+                displayName: friendDisplayName,
+                radius: 20,
+                fontSize: 14,
+              ),
               subtitle: isBlocked
                   ? null
-                  : (friendId.isNotEmpty ? const UserPresenceStatus() : null),
+                  : (friendId.isNotEmpty ? UserPresenceStatus(friendId: friendId) : null),
               onTitleTap: () {
                 Navigator.pushNamed(
                   context,

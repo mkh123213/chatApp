@@ -36,6 +36,8 @@ class _StatusViewerBodyState extends State<StatusViewerBody>
   late int _currentPage;
   late AnimationController _progressController;
   final TextEditingController _replyController = TextEditingController();
+  bool _paused = false;
+  bool _imageLoaded = false;
 
   static const Duration _pageDuration = Duration(seconds: 5);
 
@@ -50,10 +52,40 @@ class _StatusViewerBodyState extends State<StatusViewerBody>
         if (status == AnimationStatus.completed) {
           _goToNext();
         }
-      })
-      ..forward();
+      });
+    _startTimerForCurrentStatus();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _markViewed(widget.initialIndex);
+    });
+  }
+
+  void _startTimerForCurrentStatus() {
+    final status = _statuses[_currentPage];
+    if (status.isImage && status.mediaUrl.isNotEmpty) {
+      _imageLoaded = false;
+    } else {
+      _imageLoaded = true;
+      _progressController.forward();
+    }
+  }
+
+  void _onImageLoaded() {
+    if (!_imageLoaded && mounted) {
+      _imageLoaded = true;
+      if (!_paused) {
+        _progressController.forward();
+      }
+    }
+  }
+
+  void _togglePause() {
+    setState(() {
+      _paused = !_paused;
+      if (_paused) {
+        _progressController.stop();
+      } else if (_imageLoaded) {
+        _progressController.forward();
+      }
     });
   }
 
@@ -86,7 +118,8 @@ class _StatusViewerBodyState extends State<StatusViewerBody>
 
   void _resetProgress() {
     _progressController.reset();
-    _progressController.forward();
+    _paused = false;
+    _startTimerForCurrentStatus();
   }
 
   @override
@@ -112,20 +145,38 @@ class _StatusViewerBodyState extends State<StatusViewerBody>
         body: Stack(
           children: [
             // Page content
-            PageView.builder(
-              controller: _pageController,
-              itemCount: _statuses.length,
-              onPageChanged: (index) {
-                _currentPage = index;
-                _markViewed(index);
-                _resetProgress();
-                setState(() {});
-              },
-              itemBuilder: (_, index) {
-                final status = _statuses[index];
-                return _StatusPage(status: status);
-              },
+            GestureDetector(
+              onTap: _togglePause,
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: _statuses.length,
+                onPageChanged: (index) {
+                  _currentPage = index;
+                  _markViewed(index);
+                  _resetProgress();
+                  setState(() {});
+                },
+                itemBuilder: (_, index) {
+                  final status = _statuses[index];
+                  return _StatusPage(
+                    status: status,
+                    onImageLoaded: _onImageLoaded,
+                  );
+                },
+              ),
             ),
+            // Pause indicator
+            if (_paused)
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.pause, color: Colors.white, size: 32.sp),
+                ),
+              ),
             // Top overlay: progress bars + header
             SafeArea(
               child: Column(
@@ -390,9 +441,10 @@ class _ReplyBar extends StatelessWidget {
 }
 
 class _StatusPage extends StatelessWidget {
-  const _StatusPage({required this.status});
+  const _StatusPage({required this.status, this.onImageLoaded});
 
   final StatusModel status;
+  final VoidCallback? onImageLoaded;
 
   @override
   Widget build(BuildContext context) {
@@ -400,10 +452,17 @@ class _StatusPage extends StatelessWidget {
       return CachedNetworkImage(
         imageUrl: status.mediaUrl,
         fit: BoxFit.cover,
+        imageBuilder: (context, imageProvider) {
+          onImageLoaded?.call();
+          return Image(image: imageProvider, fit: BoxFit.cover);
+        },
         placeholder: (_, __) =>
             const Center(child: CircularProgressIndicator()),
-        errorWidget: (_, __, ___) =>
-            const Center(child: Icon(Icons.broken_image, color: Colors.white)),
+        errorWidget: (_, __, ___) {
+          onImageLoaded?.call();
+          return const Center(
+              child: Icon(Icons.broken_image, color: Colors.white));
+        },
       );
     }
 

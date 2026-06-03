@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_material3/core/extensions/context_extension.dart';
 import 'package:chat_material3/core/language/lang_keys.dart';
+import 'package:chat_material3/features/single_chat/presentation/bloc/typing_cubit/typing_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/bloc/user_presence_cubit/user_presence_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/bloc/user_presence_cubit/user_presence_state.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 class UserPresenceStatus extends StatefulWidget {
-  const UserPresenceStatus({super.key});
+  const UserPresenceStatus({super.key, this.friendId});
+
+  final String? friendId;
 
   @override
   State<UserPresenceStatus> createState() => _UserPresenceStatusState();
@@ -37,9 +40,21 @@ class _UserPresenceStatusState extends State<UserPresenceStatus> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserPresenceCubit, UserPresenceState>(
-      builder: (context, state) {
-        return state.when(
+    return BlocBuilder<TypingCubit, TypingState>(
+      builder: (context, typingState) {
+        if (widget.friendId != null &&
+            typingState.isUserTyping(widget.friendId!)) {
+          return Text(
+            'typing...',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: const Color(0xFF4CAF50),
+                  fontStyle: FontStyle.italic,
+                ),
+          );
+        }
+        return BlocBuilder<UserPresenceCubit, UserPresenceState>(
+          builder: (context, state) {
+            return state.when(
           initial: () => const SizedBox.shrink(),
           online: () => Text(
             context.translate(LangKeys.online),
@@ -57,6 +72,8 @@ class _UserPresenceStatusState extends State<UserPresenceStatus> {
                 ),
           ),
           error: (_) => const SizedBox.shrink(),
+        );
+          },
         );
       },
     );

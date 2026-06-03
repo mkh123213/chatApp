@@ -205,31 +205,34 @@ class AuthCubit extends Cubit<AuthState> {
 
     try {
       final currentUserJson = SharedPref().getString(PrefKeys.currentUser);
+      CurrentUserModel currentUser;
 
-      if (currentUserJson == null || currentUserJson.isEmpty) {
-        throw Exception('No current user found.');
+      if (currentUserJson != null && currentUserJson.isNotEmpty) {
+        currentUser = CurrentUserModel.fromJson(
+          jsonDecode(currentUserJson) as Map<String, dynamic>,
+        );
+      } else {
+        final firebaseUser = authService.currentUser;
+        if (firebaseUser == null) {
+          throw Exception('No user is currently signed in.');
+        }
+        currentUser = CurrentUserModel(
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          name: firebaseUser.displayName,
+          emailVerified: firebaseUser.emailVerified,
+          isAnonymous: firebaseUser.isAnonymous,
+        );
       }
-
-      final currentUser = CurrentUserModel.fromJson(
-        jsonDecode(currentUserJson) as Map<String, dynamic>,
-      );
 
       if (name.trim().isNotEmpty && name.trim() != currentUser.name) {
-        await authService.updateUserName(
-          name: name.trim(),
-        );
-      }
-
-      if (email.trim().isNotEmpty && email.trim() != currentUser.email) {
-        await authService.updateUserEmail(
-          email: email.trim(),
-        );
+        await authService.updateUserName(name: name.trim());
       }
 
       final updatedUser = CurrentUserModel(
         uid: currentUser.uid,
-        email: email.trim(),
-        name: name.trim(),
+        email: email.trim().isNotEmpty ? email.trim() : currentUser.email,
+        name: name.trim().isNotEmpty ? name.trim() : currentUser.name,
         phoneNumber: phoneNumber.trim(),
         photoUrl: currentUser.photoUrl,
         emailVerified: currentUser.emailVerified,
