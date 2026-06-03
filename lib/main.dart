@@ -20,21 +20,11 @@ import 'package:chat_material3/core/service/dnd/dnd_service.dart';
 import 'package:chat_material3/core/service/wallpaper/wallpaper_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/*************  ✨ Windsurf Command ⭐  *************/
-///
-/// Initialize the application environment.
-///
-/// - Initialize the widget binding.
-/// - Initialize the environment variables based on the environment type.
-/// - Initialize the Firebase with the environment variables.
-/// - Set the preferred device orientations.
-/// *****  c78a5125-ab94-4539-938e-d2f21799608c  ******
-///
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await EnvVariable.instance.init(envType: EnvTypeEnum.dev);
-// 
+  //
   //  "current_key": "AIzaSyBDzognjD6pwp6oKKOoEkklgOunZo3W-fs" ==> apiKey
   //  "mobilesdk_app_id": "1:255535904497:android:bf1c974c2689a199431b50" ==> appId
   // "project_number": "255535904497" ==> messagingSenderId
