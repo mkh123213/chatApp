@@ -8,12 +8,14 @@ list(APPEND FLUTTER_PLUGIN_LIST
   audioplayers_windows
   cloud_firestore
   connectivity_plus
+  emoji_picker_flutter
   file_selector_windows
   firebase_auth
   firebase_core
   iris_method_channel
   permission_handler_windows
   record_windows
+  share_plus
   url_launcher_windows
 )
 
