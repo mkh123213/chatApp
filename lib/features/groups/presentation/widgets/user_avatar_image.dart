@@ -1,10 +1,8 @@
-import 'dart:convert';
 
 import 'package:chat_material3/core/app/upload_image/cubit/upload_image_cubit.dart';
 import 'package:chat_material3/core/common/animations/animate_do.dart';
 import 'package:chat_material3/core/common/toast/show_toast.dart';
 import 'package:chat_material3/core/extensions/context_extension.dart';
-import 'package:chat_material3/core/helper_functions/get_current_user.dart';
 import 'package:chat_material3/core/language/lang_keys.dart';
 import 'package:chat_material3/core/service/shared_pref/pref_keys.dart';
 import 'package:chat_material3/core/service/shared_pref/shared_pref.dart';
@@ -68,7 +66,7 @@ class UserAvararImage extends StatelessWidget {
                             SharedPref().getString(PrefKeys.currentUserUrl)!)
                         as ImageProvider
                     : const AssetImage(AppImages.userAvatar),
-                backgroundColor: Colors.grey.withOpacity(.1),
+                backgroundColor: Colors.grey.withValues(alpha: .1),
                 child: Stack(
                   alignment: AlignmentDirectional.center,
                   children: [
@@ -96,7 +94,7 @@ class UserAvararImage extends StatelessWidget {
                         shape: BoxShape.circle,
                         color: isImageUploaded
                             ? Colors.transparent
-                            : Colors.black.withOpacity(0.4),
+                            : Colors.black.withValues(alpha: 0.4),
                       ),
                     ),
 

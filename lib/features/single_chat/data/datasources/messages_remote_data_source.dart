@@ -11,6 +11,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 abstract class MessagesRemoteDataSource {
   Stream<List<MessageModel>> getMessages({required String chatId});
 
+  Future<QuerySnapshot> getMessagesPage({
+    required String chatId,
+    required int limit,
+    DocumentSnapshot? lastDocument,
+  });
+
   Future<void> sendTextMessage({
     required String chatId,
     required String senderId,
@@ -126,8 +132,25 @@ class MessagesRemoteDataSourceImpl implements MessagesRemoteDataSource {
       builder: (data, documentId) =>
           MessageModel.fromFirestore(id: documentId, data: data),
       path: '$chatsCollection/$chatId/$messagesCollection',
-      queryBuilder: (query) => query.orderBy('createdAt', descending: true),
+      queryBuilder: (query) =>
+          query.orderBy('createdAt', descending: true).limit(30),
     );
+  }
+
+  @override
+  Future<QuerySnapshot> getMessagesPage({
+    required String chatId,
+    required int limit,
+    DocumentSnapshot? lastDocument,
+  }) async {
+    Query query = FirebaseFirestore.instance
+        .collection('$chatsCollection/$chatId/$messagesCollection')
+        .orderBy('createdAt', descending: true)
+        .limit(limit);
+    if (lastDocument != null) {
+      query = query.startAfterDocument(lastDocument);
+    }
+    return await query.get();
   }
 
   @override

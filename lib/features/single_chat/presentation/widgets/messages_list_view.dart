@@ -1,6 +1,5 @@
 import 'package:chat_material3/core/common/loading/empty_screen.dart';
 import 'package:chat_material3/core/common/widgets/chat/chat_widgets.dart';
-import 'package:chat_material3/core/common/widgets/chat/message_read_status.dart';
 import 'package:chat_material3/core/extensions/context_extension.dart';
 import 'package:chat_material3/core/helper_functions/get_current_user.dart';
 import 'package:chat_material3/core/language/lang_keys.dart';
@@ -12,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-class MessagesListView extends StatelessWidget {
+class MessagesListView extends StatefulWidget {
   const MessagesListView({
     super.key,
     required this.chat,
@@ -23,6 +22,32 @@ class MessagesListView extends StatelessWidget {
   final void Function(MessageModel message)? onReply;
 
   @override
+  State<MessagesListView> createState() => _MessagesListViewState();
+}
+
+class _MessagesListViewState extends State<MessagesListView> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      context.read<MessagesCubit>().loadMoreMessages(chatId: widget.chat.id);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocBuilder<MessagesCubit, MessagesState>(
       builder: (context, state) {
@@ -30,11 +55,16 @@ class MessagesListView extends StatelessWidget {
           MessagesLoading() => const Center(
               child: CircularProgressIndicator(),
             ),
-          MessagesLoaded(:final messages, :final selectedIds) =>
+          MessagesLoaded(:final messages, :final selectedIds, :final isLoadingMore) =>
             ListView.builder(
+              controller: _scrollController,
               reverse: true,
-              itemCount: messages.length,
+              itemCount: messages.length + (isLoadingMore ? 1 : 0),
               itemBuilder: (context, index) {
+                if (index == messages.length) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                
                 final msg = messages[index];
                 final isMe = msg.senderId == getCurrentUser().uid;
                 final cubit = context.read<MessagesCubit>();
@@ -65,9 +95,9 @@ class MessagesListView extends StatelessWidget {
                   replyToType: msg.replyToType,
                 );
 
-                if (onReply != null && !inSelectionMode) {
+                if (widget.onReply != null && !inSelectionMode) {
                   bubble = _SwipeToReply(
-                    onReply: () => onReply!(msg),
+                    onReply: () => widget.onReply!(msg),
                     child: bubble,
                   );
                 }

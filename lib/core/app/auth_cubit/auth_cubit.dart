@@ -8,7 +8,6 @@ import 'package:chat_material3/core/service/fierstore/firestore_service.dart';
 import 'package:chat_material3/core/service/shared_pref/pref_keys.dart';
 import 'package:chat_material3/core/service/shared_pref/shared_pref.dart';
 import 'package:chat_material3/core/di/injection_container.dart';
-import 'package:chat_material3/core/utils/app_strings.dart';
 import 'package:chat_material3/core/service/push_notification/chat_notification_service.dart';
 import 'package:chat_material3/core/service/user_presence/user_presence_service.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -20,7 +19,7 @@ class AuthCubit extends Cubit<AuthState> {
   AuthCubit({
     required this.authService,
     required this.dataBaseService,
-  }) : super(AuthState.initial());
+  }) : super(const AuthState.initial());
 
   final AuthService authService;
   final DataBaseService dataBaseService;
@@ -31,7 +30,7 @@ class AuthCubit extends Cubit<AuthState> {
     required String email,
     required String password,
   }) async {
-    emit(AuthState.loading());
+    emit(const AuthState.loading());
     try {
       final user = await authService.signInWithEmailAndPassword(
           email: email, password: password);
@@ -51,7 +50,7 @@ class AuthCubit extends Cubit<AuthState> {
       );
       sl<UserPresenceService>().start(userId: userModel.uid);
       ChatNotificationService.instance.saveFcmToken(userId: userModel.uid);
-      emit(AuthState.authenticated());
+      emit(const AuthState.authenticated());
     } catch (e) {
       emit(AuthState.error(message: e.toString()));
     }
@@ -60,12 +59,12 @@ class AuthCubit extends Cubit<AuthState> {
   // You can add more methods for other authentication actions like sign up, sign out, etc.
 
   Future<void> signOut() async {
-    emit(AuthState.loading());
+    emit(const AuthState.loading());
     try {
       sl<UserPresenceService>().stop();
       await authService.signOut();
       SharedPref().clearPreferences();
-      emit(AuthState.unauthenticated());
+      emit(const AuthState.unauthenticated());
     } catch (e) {
       emit(AuthState.error(message: e.toString()));
     }
@@ -78,7 +77,7 @@ class AuthCubit extends Cubit<AuthState> {
     String phone = '',
     String photoUrl = '',
   }) async {
-    emit(AuthState.loading());
+    emit(const AuthState.loading());
     try {
       final credential = await authService.createUserWithEmailAndPassword(
           email: email, password: password);
@@ -112,14 +111,14 @@ class AuthCubit extends Cubit<AuthState> {
       sl<UserPresenceService>().start(userId: userModel.uid);
       ChatNotificationService.instance.saveFcmToken(userId: userModel.uid);
 
-      emit(AuthState.authenticated());
+      emit(const AuthState.authenticated());
     } catch (e) {
       emit(AuthState.error(message: e.toString()));
     }
   }
 
   Future<void> sendPasswordResetEmail({required String email}) async {
-    emit(AuthState.loading());
+    emit(const AuthState.loading());
     try {
       await authService.sendPasswordResetEmail(email: email);
       emit(const AuthState.passwordResetSent());
@@ -129,30 +128,30 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> sendEmailVerification() async {
-    emit(AuthState.loading());
+    emit(const AuthState.loading());
     try {
       await authService.sendEmailVerification();
-      emit(AuthState.authenticated());
+      emit(const AuthState.authenticated());
     } catch (e) {
       emit(AuthState.error(message: e.toString()));
     }
   }
 
   Future<void> updateUserName({required String name}) async {
-    emit(AuthState.loading());
+    emit(const AuthState.loading());
     try {
       await authService.updateUserName(name: name);
-      emit(AuthState.authenticated());
+      emit(const AuthState.authenticated());
     } catch (e) {
       emit(AuthState.error(message: e.toString()));
     }
   }
 
   Future<void> updateUserEmail({required String email}) async {
-    emit(AuthState.loading());
+    emit(const AuthState.loading());
     try {
       await authService.updateUserEmail(email: email);
-      emit(AuthState.authenticated());
+      emit(const AuthState.authenticated());
     } catch (e) {
       emit(AuthState.error(message: e.toString()));
     }
@@ -177,20 +176,20 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> deleteAccount() async {
-    emit(AuthState.loading());
+    emit(const AuthState.loading());
     try {
       await authService.deleteAccount();
-      emit(AuthState.unauthenticated());
+      emit(const AuthState.unauthenticated());
     } catch (e) {
       emit(AuthState.error(message: e.toString()));
     }
   }
 
   Future<void> signInWithGoogle() async {
-    emit(AuthState.loading());
+    emit(const AuthState.loading());
     try {
       await authService.signInWithGoogle();
-      emit(AuthState.authenticated());
+      emit(const AuthState.authenticated());
     } catch (e) {
       emit(AuthState.error(message: e.toString()));
     }

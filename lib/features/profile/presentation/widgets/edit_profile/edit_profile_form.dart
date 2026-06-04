@@ -11,7 +11,6 @@ import 'package:chat_material3/core/utils/app_regex.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:iconsax/iconsax.dart';
 
 class EditProfileForm extends StatefulWidget {
   const EditProfileForm({

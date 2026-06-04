@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:chat_material3/core/common/widgets/text_app.dart';
 import 'package:chat_material3/core/extensions/context_extension.dart';
-import 'package:chat_material3/core/style/colors/colors_dark.dart';
 import 'package:chat_material3/core/style/fonts/font_family_helper.dart';
 import 'package:chat_material3/core/style/fonts/font_weight_helper.dart';
 

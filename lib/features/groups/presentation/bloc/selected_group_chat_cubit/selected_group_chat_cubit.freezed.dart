@@ -166,7 +166,8 @@ extension SelectedGroupChatStatePatterns on SelectedGroupChatState {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(List<GroupMessageModel> messages, Set<String> selectedIds)?
+    TResult Function(List<GroupMessageModel> messages, Set<String> selectedIds,
+            bool hasMore, bool isLoadingMore)?
         loaded,
     TResult Function()? empty,
     TResult Function(String message)? error,
@@ -179,7 +180,8 @@ extension SelectedGroupChatStatePatterns on SelectedGroupChatState {
       case _Loading() when loading != null:
         return loading();
       case _Loaded() when loaded != null:
-        return loaded(_that.messages, _that.selectedIds);
+        return loaded(_that.messages, _that.selectedIds, _that.hasMore,
+            _that.isLoadingMore);
       case _Empty() when empty != null:
         return empty();
       case _Error() when error != null:
@@ -206,8 +208,8 @@ extension SelectedGroupChatStatePatterns on SelectedGroupChatState {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(
-            List<GroupMessageModel> messages, Set<String> selectedIds)
+    required TResult Function(List<GroupMessageModel> messages,
+            Set<String> selectedIds, bool hasMore, bool isLoadingMore)
         loaded,
     required TResult Function() empty,
     required TResult Function(String message) error,
@@ -219,7 +221,8 @@ extension SelectedGroupChatStatePatterns on SelectedGroupChatState {
       case _Loading():
         return loading();
       case _Loaded():
-        return loaded(_that.messages, _that.selectedIds);
+        return loaded(_that.messages, _that.selectedIds, _that.hasMore,
+            _that.isLoadingMore);
       case _Empty():
         return empty();
       case _Error():
@@ -245,8 +248,8 @@ extension SelectedGroupChatStatePatterns on SelectedGroupChatState {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(
-            List<GroupMessageModel> messages, Set<String> selectedIds)?
+    TResult? Function(List<GroupMessageModel> messages, Set<String> selectedIds,
+            bool hasMore, bool isLoadingMore)?
         loaded,
     TResult? Function()? empty,
     TResult? Function(String message)? error,
@@ -258,7 +261,8 @@ extension SelectedGroupChatStatePatterns on SelectedGroupChatState {
       case _Loading() when loading != null:
         return loading();
       case _Loaded() when loaded != null:
-        return loaded(_that.messages, _that.selectedIds);
+        return loaded(_that.messages, _that.selectedIds, _that.hasMore,
+            _that.isLoadingMore);
       case _Empty() when empty != null:
         return empty();
       case _Error() when error != null:
@@ -314,7 +318,9 @@ class _Loading implements SelectedGroupChatState {
 class _Loaded implements SelectedGroupChatState {
   const _Loaded(
       {required final List<GroupMessageModel> messages,
-      final Set<String> selectedIds = const {}})
+      final Set<String> selectedIds = const {},
+      this.hasMore = true,
+      this.isLoadingMore = false})
       : _messages = messages,
         _selectedIds = selectedIds;
 
@@ -333,6 +339,11 @@ class _Loaded implements SelectedGroupChatState {
     return EqualUnmodifiableSetView(_selectedIds);
   }
 
+  @JsonKey()
+  final bool hasMore;
+  @JsonKey()
+  final bool isLoadingMore;
+
   /// Create a copy of SelectedGroupChatState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -347,18 +358,23 @@ class _Loaded implements SelectedGroupChatState {
             other is _Loaded &&
             const DeepCollectionEquality().equals(other._messages, _messages) &&
             const DeepCollectionEquality()
-                .equals(other._selectedIds, _selectedIds));
+                .equals(other._selectedIds, _selectedIds) &&
+            (identical(other.hasMore, hasMore) || other.hasMore == hasMore) &&
+            (identical(other.isLoadingMore, isLoadingMore) ||
+                other.isLoadingMore == isLoadingMore));
   }
 
   @override
   int get hashCode => Object.hash(
       runtimeType,
       const DeepCollectionEquality().hash(_messages),
-      const DeepCollectionEquality().hash(_selectedIds));
+      const DeepCollectionEquality().hash(_selectedIds),
+      hasMore,
+      isLoadingMore);
 
   @override
   String toString() {
-    return 'SelectedGroupChatState.loaded(messages: $messages, selectedIds: $selectedIds)';
+    return 'SelectedGroupChatState.loaded(messages: $messages, selectedIds: $selectedIds, hasMore: $hasMore, isLoadingMore: $isLoadingMore)';
   }
 }
 
@@ -368,7 +384,11 @@ abstract mixin class _$LoadedCopyWith<$Res>
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) =
       __$LoadedCopyWithImpl;
   @useResult
-  $Res call({List<GroupMessageModel> messages, Set<String> selectedIds});
+  $Res call(
+      {List<GroupMessageModel> messages,
+      Set<String> selectedIds,
+      bool hasMore,
+      bool isLoadingMore});
 }
 
 /// @nodoc
@@ -384,6 +404,8 @@ class __$LoadedCopyWithImpl<$Res> implements _$LoadedCopyWith<$Res> {
   $Res call({
     Object? messages = null,
     Object? selectedIds = null,
+    Object? hasMore = null,
+    Object? isLoadingMore = null,
   }) {
     return _then(_Loaded(
       messages: null == messages
@@ -394,6 +416,14 @@ class __$LoadedCopyWithImpl<$Res> implements _$LoadedCopyWith<$Res> {
           ? _self._selectedIds
           : selectedIds // ignore: cast_nullable_to_non_nullable
               as Set<String>,
+      hasMore: null == hasMore
+          ? _self.hasMore
+          : hasMore // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isLoadingMore: null == isLoadingMore
+          ? _self.isLoadingMore
+          : isLoadingMore // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }

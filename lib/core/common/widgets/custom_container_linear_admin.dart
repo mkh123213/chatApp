@@ -22,20 +22,20 @@ class CustomContainerLinearAdmin extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
           colors: [
-            context.color.primaryContainer.withOpacity(0.8),
-            context.color.primary.withOpacity(0.8),
+            context.color.primaryContainer.withValues(alpha: 0.8),
+            context.color.primary.withValues(alpha: 0.8),
           ],
           begin: const Alignment(0.36, 0.27),
           end: const Alignment(0.58, 0.85),
         ),
         boxShadow: [
           BoxShadow(
-            color: context.color.outline.withOpacity(0.3),
+            color: context.color.outline.withValues(alpha: 0.3),
             offset: const Offset(0, 4),
             blurRadius: 8,
           ),
           BoxShadow(
-            color: context.color.outlineVariant.withOpacity(0.3),
+            color: context.color.outlineVariant.withValues(alpha: 0.3),
             offset: const Offset(0, 4),
             blurRadius: 2,
           ),

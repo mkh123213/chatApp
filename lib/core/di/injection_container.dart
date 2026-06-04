@@ -12,7 +12,7 @@ import 'package:chat_material3/features/single_chat/data/repositories/block_repo
 import 'package:chat_material3/features/single_chat/data/repositories/chats_repo.dart';
 import 'package:chat_material3/features/single_chat/data/repositories/messages_repo_impl.dart';
 import 'package:chat_material3/core/app/repo/unread_messages_repo.dart';
-import 'package:chat_material3/features/single_chat/domain/repositories/messages_repo.dart';
+import 'package:chat_material3/features/single_chat/data/repositories/messages_repo.dart';
 import 'package:chat_material3/features/single_chat/presentation/bloc/block_cubit/block_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/bloc/create_chat_cubit/create_chat_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/bloc/get_chatss/chats_cubit.dart';
@@ -216,7 +216,6 @@ Future<void> _initCore() async {
     ..registerLazySingleton<AuthService>(() => FirebaseAuthService())
     ..registerLazySingleton<DataBaseService>(() => FirestoreServices());
   // ..registerFactory(ShareCubit.new)
-  ;
 }
 
 Future<void> _initAuth() async {

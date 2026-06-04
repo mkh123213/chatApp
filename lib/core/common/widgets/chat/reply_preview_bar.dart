@@ -32,8 +32,8 @@ class ReplyPreviewBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.color.surfaceContainerHigh,
         border: Border(
-          left: BorderSide(
-            color: const Color(0xFF4CAF50),
+          left: const BorderSide(
+            color: Color(0xFF4CAF50),
             width: 3,
           ),
           top: BorderSide(

@@ -267,9 +267,9 @@ class _ReplyPreview extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(8),
-        border: Border(
+        border: const Border(
           left: BorderSide(
-            color: const Color(0xFF4CAF50),
+            color: Color(0xFF4CAF50),
             width: 3,
           ),
         ),

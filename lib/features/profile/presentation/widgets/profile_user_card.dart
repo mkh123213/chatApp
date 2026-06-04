@@ -31,7 +31,7 @@ class ProfileUserCard extends StatelessWidget {
           else
             CircleAvatar(
               radius: 40.r,
-              backgroundColor: context.color.primary.withOpacity(0.2),
+              backgroundColor: context.color.primary.withValues(alpha: 0.2),
               child: TextApp(
                 text: _initials(user),
                 theme: context.textStyle.copyWith(

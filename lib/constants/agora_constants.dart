@@ -1,1 +1,3 @@
-const String agoraAppId = 'f12ce546beab424788857fd05ce38187';
+import 'package:chat_material3/core/service/env/env_variable.dart';
+
+final String agoraAppId = EnvVariable.instance.agoraAppId;

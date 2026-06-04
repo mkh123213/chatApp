@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:chat_material3/features/single_chat/data/models/chat_model.dart';
 import 'package:chat_material3/features/single_chat/data/repositories/chats_repo.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'chats_state.dart';
 
@@ -16,12 +17,15 @@ class ChatsCubit extends Cubit<ChatsState> {
   StreamSubscription<List<ChatModel>>? _chatsSubscription;
   bool _isListeningToChats = false;
   List<ChatModel> _allChats = [];
+  DocumentSnapshot? _lastDocument;
 
   void getChats({required String currentUserId}) {
     if (_isListeningToChats) return;
     _isListeningToChats = true;
 
     emit(const ChatsLoading());
+    _allChats = [];
+    _lastDocument = null;
 
     _chatsSubscription =
         _chatsRepo.getChats(currentUserId: currentUserId).listen(
@@ -31,7 +35,7 @@ class ChatsCubit extends Cubit<ChatsState> {
         if (chats.isEmpty) {
           emit(const ChatsEmpty());
         } else {
-          emit(ChatsLoaded(chats: chats));
+          emit(ChatsLoaded(chats: chats, hasMore: chats.length == 20));
         }
       },
       onError: (error) {
@@ -39,6 +43,37 @@ class ChatsCubit extends Cubit<ChatsState> {
         emit(ChatsError(message: error.toString()));
       },
     );
+  }
+
+  Future<void> loadMoreChats({required String currentUserId}) async {
+    final currentState = state;
+    if (currentState is ChatsLoaded) {
+      if (!currentState.hasMore || currentState.isLoadingMore) return;
+      emit(currentState.copyWith(isLoadingMore: true));
+
+      final snapshot = await _chatsRepo.getChatsPage(
+        currentUserId: currentUserId,
+        limit: 20,
+        lastDocument: _lastDocument,
+      );
+
+      final newChats = snapshot.docs
+          .map((doc) => ChatModel.fromFirestore(
+              id: doc.id, data: doc.data() as Map<String, dynamic>))
+          .toList();
+
+      if (newChats.isNotEmpty) {
+        _lastDocument = snapshot.docs.last;
+        _allChats.addAll(newChats);
+        emit(currentState.copyWith(
+          chats: List.from(_allChats),
+          isLoadingMore: false,
+          hasMore: newChats.length == 20,
+        ));
+      } else {
+        emit(currentState.copyWith(isLoadingMore: false, hasMore: false));
+      }
+    }
   }
 
   void refreshChats({required String currentUserId}) {

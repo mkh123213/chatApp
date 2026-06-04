@@ -1,8 +1,15 @@
 import 'package:chat_material3/features/single_chat/data/datasources/chats_remote_data_source.dart';
 import 'package:chat_material3/features/single_chat/data/models/chat_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class ChatsRepo {
   Stream<List<ChatModel>> getChats({required String currentUserId});
+
+  Future<QuerySnapshot> getChatsPage({
+    required String currentUserId,
+    required int limit,
+    DocumentSnapshot? lastDocument,
+  });
 
   Future<void> createChat({
     required String currentUserId,
@@ -37,6 +44,19 @@ class ChatsRepoImpl implements ChatsRepo {
   @override
   Stream<List<ChatModel>> getChats({required String currentUserId}) {
     return _chatsRemoteDataSource.getChats(currentUserId: currentUserId);
+  }
+
+  @override
+  Future<QuerySnapshot> getChatsPage({
+    required String currentUserId,
+    required int limit,
+    DocumentSnapshot? lastDocument,
+  }) {
+    return _chatsRemoteDataSource.getChatsPage(
+      currentUserId: currentUserId,
+      limit: limit,
+      lastDocument: lastDocument,
+    );
   }
 
   @override

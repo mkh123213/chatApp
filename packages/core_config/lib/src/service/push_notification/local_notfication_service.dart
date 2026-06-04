@@ -24,7 +24,7 @@ class LocalNotificationService {
     );
 
     await flutterLocalNotificationsPlugin.initialize(
-      settings,
+      settings: settings,
       onDidReceiveNotificationResponse: onTap,
     );
 
@@ -65,10 +65,10 @@ class LocalNotificationService {
       ),
     );
     await flutterLocalNotificationsPlugin.show(
-      Random().nextInt(100000),
-      title,
-      body,
-      notificationDetails,
+      id: Random().nextInt(100000),
+      title: title,
+      body: body,
+      notificationDetails: notificationDetails,
       payload: payload,
     );
   }

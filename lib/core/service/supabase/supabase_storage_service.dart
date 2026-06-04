@@ -4,6 +4,7 @@
 // CHANGE: Add/remove upload methods to match your project's file types (e.g., remove chat/group/status methods if not needed).
 import 'dart:io';
 
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path/path.dart' as p;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,6 +16,34 @@ class SupabaseStorageService {
   final SupabaseClient _client;
 
   static const String bucketName = 'chatapp';
+
+  Future<File> _compressImage(File file) async {
+    final result = await FlutterImageCompress.compressWithFile(
+      file.absolute.path,
+      minWidth: 1200,
+      minHeight: 1200,
+      quality: 80,
+    );
+    if (result == null) return file;
+    final tempDir = Directory.systemTemp;
+    final tempFile = File('${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg');
+    await tempFile.writeAsBytes(result);
+    return tempFile;
+  }
+
+  Future<File> _generateThumbnail(File file) async {
+    final result = await FlutterImageCompress.compressWithFile(
+      file.absolute.path,
+      minWidth: 200,
+      minHeight: 200,
+      quality: 50,
+    );
+    if (result == null) return file;
+    final tempDir = Directory.systemTemp;
+    final tempFile = File('${tempDir.path}/thumb_${DateTime.now().millisecondsSinceEpoch}.jpg');
+    await tempFile.writeAsBytes(result);
+    return tempFile;
+  }
 
   String _cleanPathPart(String value) {
     return value
@@ -73,25 +102,33 @@ class SupabaseStorageService {
       throw Exception('Group id is empty. Cannot upload message image.');
     }
 
-    final extension = _safeExtension(file.path);
+    final compressedFile = await _compressImage(file);
+    final thumbnailFile = await _generateThumbnail(file);
+
+    final extension = _safeExtension(compressedFile.path);
     final fileName = '${DateTime.now().millisecondsSinceEpoch}$extension';
+    final thumbFileName = 'thumb_$fileName';
 
     final storagePath = 'groups/$cleanGroupId/messages/images/$fileName';
+    final thumbStoragePath = 'groups/$cleanGroupId/messages/images/$thumbFileName';
 
     await _client.storage.from(bucketName).upload(
           storagePath,
-          file,
-          fileOptions: const FileOptions(
-            cacheControl: '3600',
-            upsert: false,
-          ),
+          compressedFile,
+        );
+    await _client.storage.from(bucketName).upload(
+          thumbStoragePath,
+          thumbnailFile,
         );
 
     final publicUrl =
         _client.storage.from(bucketName).getPublicUrl(storagePath);
+    final thumbUrl =
+        _client.storage.from(bucketName).getPublicUrl(thumbStoragePath);
 
     return UploadedFileData(
       url: publicUrl,
+      thumbnailUrl: thumbUrl,
       storagePath: storagePath,
       fileName: fileName,
     );
@@ -179,12 +216,13 @@ class SupabaseStorageService {
     if (cleanChatId.isEmpty) {
       throw Exception('Chat id is empty. Cannot upload chat image.');
     }
-    final extension = _safeExtension(file.path);
+    final compressedFile = await _compressImage(file);
+    final extension = _safeExtension(compressedFile.path);
     final fileName = '${DateTime.now().millisecondsSinceEpoch}$extension';
     final storagePath = 'chats/$cleanChatId/messages/images/$fileName';
     await _client.storage.from(bucketName).upload(
           storagePath,
-          file,
+          compressedFile,
           fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
         );
     final publicUrl =
@@ -247,14 +285,15 @@ class SupabaseStorageService {
       throw Exception('User id is empty. Cannot upload status image.');
     }
 
-    final extension = _safeExtension(file.path);
+    final compressedFile = await _compressImage(file);
+    final extension = _safeExtension(compressedFile.path);
     final fileName = '${DateTime.now().millisecondsSinceEpoch}$extension';
 
     final storagePath = 'statuses/$cleanUserId/$fileName';
 
     await _client.storage.from(bucketName).upload(
           storagePath,
-          file,
+          compressedFile,
           fileOptions: const FileOptions(
             cacheControl: '3600',
             upsert: false,
@@ -308,11 +347,13 @@ class SupabaseStorageService {
 class UploadedFileData {
   const UploadedFileData({
     required this.url,
+    this.thumbnailUrl,
     required this.storagePath,
     required this.fileName,
   });
 
   final String url;
+  final String? thumbnailUrl;
   final String storagePath;
   final String fileName;
 }

@@ -10,7 +10,7 @@ part 'app_cubit.freezed.dart';
 part 'app_state.dart';
 
 class AppCubit extends Cubit<AppState> {
-  AppCubit() : super(AppState.initial());
+  AppCubit() : super(const AppState.initial());
   String languageCode = 'ar';
   bool isDark = true;
 

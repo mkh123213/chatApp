@@ -158,7 +158,7 @@ class _GroupMessagesBlocConsumerState extends State<GroupMessagesBlocConsumer> {
               theme: context.textStyle,
             ),
           ),
-          loaded: (messages, selectedIds) {
+          loaded: (messages, selectedIds, _, __) {
             _ensureNamesLoaded(messages);
             final inSelectionMode = selectedIds.isNotEmpty;
             return ListView.builder(

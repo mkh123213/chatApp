@@ -1,9 +1,16 @@
 import 'dart:io';
 
 import 'package:chat_material3/features/single_chat/data/models/message_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class MessagesRepo {
   Stream<List<MessageModel>> getMessages({required String chatId});
+
+  Future<QuerySnapshot> getMessagesPage({
+    required String chatId,
+    required int limit,
+    DocumentSnapshot? lastDocument,
+  });
 
   Future<void> sendTextMessage({
     required String chatId,

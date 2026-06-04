@@ -134,7 +134,7 @@ class ChatNotificationService {
 
       await _sendViaEdgeFunction(
         token: fcmToken,
-        title: '$callerName',
+        title: callerName,
         body: 'Incoming $callTypeLabel Call',
         data: {
           'route': 'call',

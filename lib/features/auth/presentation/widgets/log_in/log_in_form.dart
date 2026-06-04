@@ -43,8 +43,8 @@ class _LogInFormState extends State<LogInForm> {
               Container(
                 width: 80.r,
                 height: 80.r,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2C2C54),
+                decoration: const BoxDecoration(
+                  color: Color(0xFF2C2C54),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

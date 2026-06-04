@@ -74,7 +74,7 @@ class _GroupInfoContentState extends State<_GroupInfoContent> {
 
         return Scaffold(
           backgroundColor: context.color.background,
-          appBar: _GroupInfoAppBar(),
+          appBar: const _GroupInfoAppBar(),
           body: isLoading
               ? const Center(child: CircularProgressIndicator())
               : _GroupInfoBody(

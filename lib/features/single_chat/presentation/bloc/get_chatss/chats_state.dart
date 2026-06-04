@@ -13,8 +13,26 @@ final class ChatsLoading extends ChatsState {
 }
 
 final class ChatsLoaded extends ChatsState {
-  const ChatsLoaded({required this.chats});
+  const ChatsLoaded({
+    required this.chats,
+    this.hasMore = true,
+    this.isLoadingMore = false,
+  });
   final List<ChatModel> chats;
+  final bool hasMore;
+  final bool isLoadingMore;
+
+  ChatsLoaded copyWith({
+    List<ChatModel>? chats,
+    bool? hasMore,
+    bool? isLoadingMore,
+  }) {
+    return ChatsLoaded(
+      chats: chats ?? this.chats,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
 }
 
 final class ChatsEmpty extends ChatsState {

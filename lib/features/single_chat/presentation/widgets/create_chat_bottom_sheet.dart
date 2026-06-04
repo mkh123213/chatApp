@@ -1,4 +1,3 @@
-import 'package:chat_material3/constants/app_images.dart';
 import 'package:chat_material3/core/common/widgets/app_back_button.dart';
 import 'package:chat_material3/core/common/widgets/text_app.dart';
 import 'package:chat_material3/core/extensions/context_extension.dart';
@@ -11,7 +10,6 @@ import 'package:chat_material3/features/single_chat/presentation/bloc/create_cha
 import 'package:chat_material3/features/single_chat/presentation/widgets/create_chat_bloc_consumer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:iconsax/iconsax.dart';
 
 class CreateChatBottomSheet extends StatefulWidget {

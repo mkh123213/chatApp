@@ -1,8 +1,9 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../datasources/messages_remote_data_source.dart';
 import '../models/message_model.dart';
-import '../../domain/repositories/messages_repo.dart';
+import 'messages_repo.dart';
 
 class MessagesRepoImpl implements MessagesRepo {
   const MessagesRepoImpl({
@@ -14,6 +15,19 @@ class MessagesRepoImpl implements MessagesRepo {
   @override
   Stream<List<MessageModel>> getMessages({required String chatId}) {
     return _messagesRemoteDataSource.getMessages(chatId: chatId);
+  }
+
+  @override
+  Future<QuerySnapshot> getMessagesPage({
+    required String chatId,
+    required int limit,
+    DocumentSnapshot? lastDocument,
+  }) {
+    return _messagesRemoteDataSource.getMessagesPage(
+      chatId: chatId,
+      limit: limit,
+      lastDocument: lastDocument,
+    );
   }
 
   @override

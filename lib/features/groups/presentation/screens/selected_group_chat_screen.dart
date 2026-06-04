@@ -195,7 +195,7 @@ class _SelectedMessagesHeader extends StatelessWidget {
           ? () {
               final messageId = cubit.selectedMessageIds.first;
               final messages = cubit.state.maybeWhen(
-                loaded: (msgs, _) => msgs,
+                loaded: (msgs, _, __, ___) => msgs,
                 orElse: () => null,
               );
               if (messages == null) return;

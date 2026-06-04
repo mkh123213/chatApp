@@ -93,8 +93,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                 Container(
                   width: 64.r,
                   height: 64.r,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E2E),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF1E1E2E),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(

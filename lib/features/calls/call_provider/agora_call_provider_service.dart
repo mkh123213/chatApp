@@ -9,7 +9,7 @@ class AgoraCallProviderService implements CallProviderService {
   @override
   Future<void> initialize() async {
     _engine = createAgoraRtcEngine();
-    await _engine!.initialize(const RtcEngineContext(
+    await _engine!.initialize(RtcEngineContext(
       appId: agoraAppId,
       channelProfile: ChannelProfileType.channelProfileCommunication,
     ));

@@ -63,13 +63,24 @@ async function getAccessToken(): Promise<string> {
   return tokenData.access_token;
 }
 
+const requestLog = new Map<string, number[]>();
+
 Deno.serve(async (req: Request) => {
-  if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
+  const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+  const now = Date.now();
+  const timestamps = requestLog.get(ip) ?? [];
+  const recentTimestamps = timestamps.filter((t) => now - t < 60000); // 1 minute window
+
+  if (recentTimestamps.length >= 60) {
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
-  try {
-    const { token, title, body, data, dataOnly, priority } = await req.json();
+  recentTimestamps.push(now);
+  requestLog.set(ip, recentTimestamps);
+...
 
     if (!token) {
       return new Response(JSON.stringify({ error: "token is required" }), {

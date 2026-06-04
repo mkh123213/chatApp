@@ -7,6 +7,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 abstract class ChatsRemoteDataSource {
   Stream<List<ChatModel>> getChats({required String currentUserId});
 
+  Future<QuerySnapshot> getChatsPage({
+    required String currentUserId,
+    required int limit,
+    DocumentSnapshot? lastDocument,
+  });
+
   Future<void> createChat({
     required String currentUserId,
     required String currentUserEmail,
@@ -39,15 +45,39 @@ class ChatsRemoteDataSourceImpl implements ChatsRemoteDataSource {
 
   @override
   Stream<List<ChatModel>> getChats({required String currentUserId}) {
-    return _dataBaseService.collectionStream(
-      builder: (data, documentId) => ChatModel.fromFirestore(
-        id: documentId,
-        data: data,
-      ),
-      path: chatsCollection,
-      queryBuilder: (query) =>
-          query.where('users', arrayContains: currentUserId),
-    );
+    return _dataBaseService
+        .collectionStream(
+          builder: (data, documentId) => ChatModel.fromFirestore(
+            id: documentId,
+            data: data,
+          ),
+          path: chatsCollection,
+          queryBuilder: (query) =>
+              query.where('users', arrayContains: currentUserId),
+        )
+        .map((chats) {
+      chats.sort((a, b) {
+        final aTime = a.lastMessageTime ?? a.createdAt ?? DateTime(2000);
+        final bTime = b.lastMessageTime ?? b.createdAt ?? DateTime(2000);
+        return bTime.compareTo(aTime);
+      });
+      return chats;
+    });
+  }
+
+  @override
+  Future<QuerySnapshot> getChatsPage({
+    required String currentUserId,
+    required int limit,
+    DocumentSnapshot? lastDocument,
+  }) async {
+    Query query = FirebaseFirestore.instance
+        .collection(chatsCollection)
+        .where('users', arrayContains: currentUserId);
+    if (lastDocument != null) {
+      query = query.startAfterDocument(lastDocument);
+    }
+    return await query.limit(limit).get();
   }
 
   @override

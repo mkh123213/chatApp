@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:chat_material3/core/helper_functions/get_current_user.dart';
 import 'package:chat_material3/features/single_chat/data/models/chat_model.dart';
-import 'package:chat_material3/features/single_chat/domain/repositories/messages_repo.dart';
+import 'package:chat_material3/features/single_chat/data/repositories/messages_repo.dart';
 
 import 'send_message_state.dart';
 

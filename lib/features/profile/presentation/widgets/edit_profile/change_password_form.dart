@@ -101,7 +101,7 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
               CustomTextField(
                 controller: oldPasswordController,
                 hintText: context.translate(LangKeys.oldPassword),
-                prefixIcon: Icon(
+                prefixIcon: const Icon(
                   Iconsax.lock,
                 ),
                 obscureText: true,
@@ -109,13 +109,13 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
               CustomTextField(
                 controller: newPasswordController,
                 hintText: context.translate(LangKeys.newPassword),
-                prefixIcon: Icon(Iconsax.password_check),
+                prefixIcon: const Icon(Iconsax.password_check),
                 obscureText: true,
               ),
               CustomTextField(
                 controller: confirmPasswordController,
                 hintText: context.translate(LangKeys.confirmPassword),
-                prefixIcon: Icon(Iconsax.password_check),
+                prefixIcon: const Icon(Iconsax.password_check),
                 obscureText: true,
               ),
               highspace(height: 24),

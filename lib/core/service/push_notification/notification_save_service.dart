@@ -1,12 +1,10 @@
 import 'package:chat_material3/constants/fierstore_paths.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:chat_material3/core/di/injection_container.dart';
 import 'package:chat_material3/core/service/fierstore/firestore_service.dart';
 import 'package:chat_material3/core/service/shared_pref/pref_keys.dart';
 import 'package:chat_material3/core/service/shared_pref/shared_pref.dart';
-import 'package:chat_material3/core/utils/app_strings.dart';
 
 class NotificationSaveService {
   static Future<void> save(RemoteMessage message) async {

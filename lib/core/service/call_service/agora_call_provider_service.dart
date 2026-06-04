@@ -31,7 +31,7 @@ class AgoraCallProviderService implements CallProviderService {
     _remoteUid = null;
 
     _engine = createAgoraRtcEngine();
-    await _engine!.initialize(const RtcEngineContext(
+    await _engine!.initialize(RtcEngineContext(
       appId: agoraAppId,
       channelProfile: ChannelProfileType.channelProfileCommunication,
     ));

@@ -1,10 +1,6 @@
-import 'dart:convert';
 
 import 'package:chat_material3/core/app/auth_cubit/auth_cubit.dart';
-import 'package:chat_material3/core/app/models/current_user_model.dart';
 import 'package:chat_material3/core/helper_functions/get_current_user.dart';
-import 'package:chat_material3/core/service/shared_pref/pref_keys.dart';
-import 'package:chat_material3/core/service/shared_pref/shared_pref.dart';
 import 'package:chat_material3/features/auth/presentation/screens/forget_password_screen.dart';
 import 'package:chat_material3/features/auth/presentation/screens/login_screen.dart';
 import 'package:chat_material3/features/auth/presentation/screens/sign_up_screen.dart';
@@ -15,9 +11,7 @@ import 'package:chat_material3/features/groups/data/models/group_model.dart';
 import 'package:chat_material3/features/groups/presentation/screens/group_info_screen.dart';
 import 'package:chat_material3/features/groups/presentation/screens/selected_group_chat_screen.dart';
 import 'package:chat_material3/features/single_chat/data/models/chat_model.dart';
-import 'package:chat_material3/core/app/app_cubit/unread_messages_cubit/unread_messages_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/screens/single_chat_screen.dart';
-import 'package:chat_material3/features/groups/presentation/widgets/media_links_docs_screen.dart';
 import 'package:chat_material3/features/single_chat/presentation/bloc/create_chat_cubit/create_chat_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/bloc/get_chatss/chats_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/screens/chat_home_screen.dart';
@@ -251,7 +245,7 @@ class AppRoutes {
         );
       case webview:
         return BaseRoute(
-          page: CustomWebView(
+          page: const CustomWebView(
               url:
                   'https://app.base44.com/apps/6a096bcfed54bde6a22d65ef/editor/preview'),
         );

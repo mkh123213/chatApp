@@ -1,4 +1,3 @@
-import 'package:chat_material3/constants/fierstore_paths.dart';
 import 'package:chat_material3/core/app/app_cubit/unread_messages_cubit/unread_messages_cubit.dart';
 import 'package:chat_material3/core/common/widgets/chat/chat_widgets.dart';
 import 'package:chat_material3/core/common/widgets/text_app.dart';
@@ -8,7 +7,6 @@ import 'package:chat_material3/core/helper_functions/spacing.dart';
 import 'package:chat_material3/core/routes/app_routes.dart';
 import 'package:chat_material3/core/style/fonts/font_weight_helper.dart';
 import 'package:chat_material3/features/groups/data/models/group_model.dart';
-import 'package:chat_material3/features/groups/presentation/screens/selected_group_chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -154,7 +152,7 @@ class _UnreadBadge extends StatelessWidget {
     return BlocProvider(
       create: (context) => sl<UnreadMessagesCubit>()
         ..getGroupUnreadMessagesCount(groupId: groupId),
-      child: UnreadCountBadge(),
+      child: const UnreadCountBadge(),
     );
   }
 }

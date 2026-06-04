@@ -1,3 +1,5 @@
+import 'dart:ui';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:chat_material3/chat_app.dart';
 import 'package:chat_material3/core/app/app_cubit/cubit/app_cubit.dart';
 import 'package:chat_material3/core/app/auth_cubit/auth_cubit.dart';
@@ -30,13 +32,17 @@ void main() async {
   // "project_number": "255535904497" ==> messagingSenderId
   // "project_id": "asroo-dev" ==> projectId
   await Firebase.initializeApp().whenComplete(() async {
+    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
     FirebaseCloudMessaging().init();
     LocalNotificationService.init();
   });
   await Supabase.initialize(
     url: 'https://nkzezuvubeloiglhdpfu.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5remV6dXZ1YmVsb2lnbGhkcGZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Nzk3NTc0NywiZXhwIjoyMDkzNTUxNzQ3fQ.Sy1_okGYZuyChiiM4PS2XUb84wDNknNYQijq09cOgY4',
+    anonKey: EnvVariable.instance.supabaseAnonKey,
   );
   // Platform.isAndroid
   //     ? await Firebase.initializeApp()

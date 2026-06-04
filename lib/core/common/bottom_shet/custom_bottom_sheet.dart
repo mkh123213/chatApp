@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:chat_material3/core/style/colors/colors_dark.dart';
 
 class CustomBottomSheet {
   const CustomBottomSheet._();

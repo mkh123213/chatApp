@@ -20,6 +20,12 @@ abstract class GroupsRemoteDataSource {
 
   Stream<List<GroupMessageModel>> getGroupMessages({required String groupId});
 
+  Future<QuerySnapshot> getGroupMessagesPage({
+    required String groupId,
+    required int limit,
+    DocumentSnapshot? lastDocument,
+  });
+
   Future<void> sendGroupMessage({
     required String groupId,
     required String senderId,
@@ -172,8 +178,25 @@ class GroupsRemoteDataSourceImpl implements GroupsRemoteDataSource {
       path: '$groupsCollection/$groupId/$messagesCollection',
       builder: (data, id) =>
           GroupMessageModel.fromFirestore(id: id, data: data),
-      queryBuilder: (query) => query.orderBy('createdAt', descending: true),
+      queryBuilder: (query) =>
+          query.orderBy('createdAt', descending: true).limit(30),
     );
+  }
+
+  @override
+  Future<QuerySnapshot> getGroupMessagesPage({
+    required String groupId,
+    required int limit,
+    DocumentSnapshot? lastDocument,
+  }) async {
+    Query query = FirebaseFirestore.instance
+        .collection('$groupsCollection/$groupId/$messagesCollection')
+        .orderBy('createdAt', descending: true)
+        .limit(limit);
+    if (lastDocument != null) {
+      query = query.startAfterDocument(lastDocument);
+    }
+    return await query.get();
   }
 
   @override

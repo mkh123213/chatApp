@@ -22,7 +22,6 @@ import 'package:chat_material3/features/single_chat/presentation/bloc/messages_c
 import 'package:chat_material3/features/single_chat/presentation/bloc/messages_cubit/messages_state.dart';
 import 'package:chat_material3/features/single_chat/presentation/bloc/send_message_cubit/send_message_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/bloc/send_message_cubit/send_message_state.dart';
-import 'package:chat_material3/core/app/app_cubit/unread_messages_cubit/unread_messages_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/bloc/typing_cubit/typing_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/bloc/user_presence_cubit/user_presence_cubit.dart';
 import 'package:chat_material3/features/single_chat/presentation/widgets/messages_list_view.dart';
@@ -352,7 +351,8 @@ class _SingleChatHeader extends StatelessWidget {
       },
       builder: (context, state) {
         final messagesCubit = context.read<MessagesCubit>();
-        final selectedIds = messagesCubit.selectedMessageIds;
+        final selectedIds =
+            state is MessagesLoaded ? state.selectedIds : const <String>{};
 
         if (selectedIds.isNotEmpty) {
           return ChatSelectedAppBar(
@@ -542,7 +542,7 @@ class _SingleChatHeader extends StatelessWidget {
     final state = messagesCubit.state;
     if (state is! MessagesLoaded) return;
 
-    final messageId = messagesCubit.selectedMessageIds.first;
+    final messageId = state.selectedIds.first;
     final msg = state.messages.firstWhere((m) => m.id == messageId);
 
     if (msg.type != 'text') {
@@ -575,7 +575,7 @@ class _SingleChatHeader extends StatelessWidget {
     final state = messagesCubit.state;
     if (state is! MessagesLoaded) return;
 
-    final ids = messagesCubit.selectedMessageIds.toList();
+    final ids = state.selectedIds.toList();
 
     showChatDeleteMessageDialog(
       context: context,

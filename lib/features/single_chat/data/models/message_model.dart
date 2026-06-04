@@ -20,6 +20,7 @@ class MessageModel {
     required this.updatedAt,
     required this.isEdited,
     this.isRead = false,
+    this.isDelivered = false,
     this.replyToId,
     this.replyToText,
     this.replyToType,
@@ -45,6 +46,7 @@ class MessageModel {
 
   final bool isEdited;
   final bool isRead;
+  final bool isDelivered;
 
   final String? replyToId;
   final String? replyToText;

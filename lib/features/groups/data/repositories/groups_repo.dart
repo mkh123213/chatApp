@@ -1,6 +1,7 @@
 import 'package:chat_material3/features/groups/data/datasources/groups_remote_data_source.dart';
 import 'package:chat_material3/features/groups/data/models/group_message_model.dart';
 import 'package:chat_material3/features/groups/data/models/group_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class GroupsRepo {
   Stream<List<GroupModel>> getGroups({required String currentUserId});
@@ -14,6 +15,12 @@ abstract class GroupsRepo {
   });
 
   Stream<List<GroupMessageModel>> getGroupMessages({required String groupId});
+
+  Future<QuerySnapshot> getGroupMessagesPage({
+    required String groupId,
+    required int limit,
+    DocumentSnapshot? lastDocument,
+  });
 
   Future<void> sendGroupMessage({
     required String groupId,
@@ -133,6 +140,18 @@ class GroupsRepoImpl implements GroupsRepo {
   @override
   Stream<List<GroupMessageModel>> getGroupMessages({required String groupId}) =>
       _groupsRemoteDataSource.getGroupMessages(groupId: groupId);
+
+  @override
+  Future<QuerySnapshot> getGroupMessagesPage({
+    required String groupId,
+    required int limit,
+    DocumentSnapshot? lastDocument,
+  }) =>
+      _groupsRemoteDataSource.getGroupMessagesPage(
+        groupId: groupId,
+        limit: limit,
+        lastDocument: lastDocument,
+      );
 
   @override
   Future<void> sendGroupMessage({

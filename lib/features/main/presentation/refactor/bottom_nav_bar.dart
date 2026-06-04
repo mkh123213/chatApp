@@ -121,7 +121,7 @@ class _MainBottomNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color activeColor = _selectedGreen;
+    const Color activeColor = _selectedGreen;
     final Color inactiveColor = context.color.onSurfaceVariant;
 
     return Material(

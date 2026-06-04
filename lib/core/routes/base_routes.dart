@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 class BaseRoute extends PageRouteBuilder<dynamic> {
-  BaseRoute({required this.page, RouteSettings? settings})
+  BaseRoute({required this.page, super.settings})
     : super(
-        settings: settings,
         pageBuilder:
             (
               BuildContext context,

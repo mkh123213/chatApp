@@ -7,6 +7,8 @@ class SelectedGroupChatState with _$SelectedGroupChatState {
   const factory SelectedGroupChatState.loaded({
     required List<GroupMessageModel> messages,
     @Default({}) Set<String> selectedIds,
+    @Default(true) bool hasMore,
+    @Default(false) bool isLoadingMore,
   }) = _Loaded;
   const factory SelectedGroupChatState.empty() = _Empty;
   const factory SelectedGroupChatState.error({required String message}) =

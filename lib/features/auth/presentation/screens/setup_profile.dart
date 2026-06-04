@@ -19,7 +19,7 @@ class _SetupProfileState extends State<SetupProfile> {
     TextEditingController nameCon = TextEditingController();
     return Scaffold(
       appBar: AppBar(
-        actions: [IconButton(onPressed: () {}, icon: Icon(Iconsax.logout_1))],
+        actions: [IconButton(onPressed: () {}, icon: const Icon(Iconsax.logout_1))],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -48,7 +48,7 @@ class _SetupProfileState extends State<SetupProfile> {
               CustomTextField(
                 controller: nameCon,
                 hintText: context.translate(LangKeys.name),
-                prefixIcon: Icon(Iconsax.user),
+                prefixIcon: const Icon(Iconsax.user),
               ),
               const SizedBox(
                 height: 16,

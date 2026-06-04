@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:chat_material3/core/common/widgets/text_app.dart';
 import 'package:chat_material3/core/extensions/context_extension.dart';
 import 'package:chat_material3/core/style/fonts/font_weight_helper.dart';
-import 'package:chat_material3/core/style/images/app_images.dart';
 
 class EmptyScreen extends StatelessWidget {
   const EmptyScreen({super.key, this.title = 'No Data'});

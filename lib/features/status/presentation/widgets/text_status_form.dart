@@ -98,7 +98,7 @@ class _TextStatusFormState extends State<TextStatusForm> {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
     final colorHex =
-        '0x${_selectedColor.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+        '0x${_selectedColor.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}';
     context.read<CreateStatusCubit>().createTextStatus(
           text: text,
           backgroundColor: colorHex,
@@ -137,7 +137,7 @@ class _ColorPalette extends StatelessWidget {
                   width: 3,
                 ),
                 boxShadow: isSelected
-                    ? [BoxShadow(color: color.withOpacity(0.6), blurRadius: 6)]
+                    ? [BoxShadow(color: color.withValues(alpha: 0.6), blurRadius: 6)]
                     : null,
               ),
             ),
