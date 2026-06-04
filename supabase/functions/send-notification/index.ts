@@ -1,0 +1,178 @@
+function base64url(data: Uint8Array): string {
+  return btoa(String.fromCharCode(...data))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
+function base64urlEncode(str: string): string {
+  return base64url(new TextEncoder().encode(str));
+}
+
+async function getAccessToken(): Promise<string> {
+  const clientEmail = Deno.env.get("FCM_CLIENT_EMAIL")!;
+  const rawKey = Deno.env.get("FCM_PRIVATE_KEY")!;
+  const privateKeyPem = rawKey.replace(/\\n/g, "\n");
+  const now = Math.floor(Date.now() / 1000);
+
+  const header = base64urlEncode(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const payload = base64urlEncode(
+    JSON.stringify({
+      iss: clientEmail,
+      scope: "https://www.googleapis.com/auth/firebase.messaging",
+      aud: "https://oauth2.googleapis.com/token",
+      iat: now,
+      exp: now + 3600,
+    })
+  );
+
+  const pemBody = privateKeyPem
+    .replace(/-----BEGIN PRIVATE KEY-----/, "")
+    .replace(/-----END PRIVATE KEY-----/, "")
+    .replace(/\s/g, "");
+  const keyBytes = Uint8Array.from(atob(pemBody), (c) => c.charCodeAt(0));
+
+  const cryptoKey = await crypto.subtle.importKey(
+    "pkcs8",
+    keyBytes,
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const signInput = new TextEncoder().encode(`${header}.${payload}`);
+  const signature = new Uint8Array(
+    await crypto.subtle.sign("RSASSA-PKCS1-v1_5", cryptoKey, signInput)
+  );
+
+  const jwt = `${header}.${payload}.${base64url(signature)}`;
+
+  const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      assertion: jwt,
+    }),
+  });
+
+  const tokenData = await tokenResponse.json();
+  if (!tokenResponse.ok) {
+    throw new Error(`Token error: ${JSON.stringify(tokenData)}`);
+  }
+  return tokenData.access_token;
+}
+
+Deno.serve(async (req: Request) => {
+  if (req.method !== "POST") {
+    return new Response("Method not allowed", { status: 405 });
+  }
+
+  try {
+    const { token, title, body, data, dataOnly, priority } = await req.json();
+
+    if (!token) {
+      return new Response(JSON.stringify({ error: "token is required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const accessToken = await getAccessToken();
+    const projectId = Deno.env.get("FCM_PROJECT_ID")!;
+
+    const isCall = data?.route === "call";
+
+    const message: Record<string, unknown> = {
+      token,
+      data: data ?? {},
+      android: isCall
+        ? {
+            priority: "high",
+            notification: {
+              sound: "default",
+              channel_id: "call-notifications",
+            },
+          }
+        : dataOnly
+          ? { priority: "high" }
+          : {
+              priority: priority === "high" ? "high" : "normal",
+              notification: {
+                sound: "default",
+                channel_id: "chat-notifications",
+              },
+            },
+      apns: isCall
+        ? {
+            payload: {
+              aps: {
+                "content-available": 1,
+                alert: {
+                  title: data?.callerName ?? "Incoming Call",
+                  body: data?.callType === "video" ? "Incoming Video Call" : "Incoming Audio Call",
+                },
+                sound: "default",
+                "interruption-level": "time-sensitive",
+              },
+            },
+            headers: {
+              "apns-push-type": "alert",
+              "apns-priority": "10",
+            },
+          }
+        : dataOnly
+          ? {
+              payload: { aps: { "content-available": 1 } },
+              headers: {
+                "apns-push-type": "background",
+                "apns-priority": "5",
+              },
+            }
+          : {
+              payload: { aps: { sound: "default", "content-available": 1 } },
+              headers: { "apns-push-type": "alert", "apns-priority": "10" },
+            },
+    };
+
+    if (isCall) {
+      message.notification = {
+        title: title ?? data?.callerName ?? "Incoming Call",
+        body: body ?? (data?.callType === "video" ? "Incoming Video Call" : "Incoming Audio Call"),
+      };
+    } else if (!dataOnly && title) {
+      message.notification = { title, body: body ?? "" };
+    }
+
+    const fcmUrl = `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`;
+
+    const response = await fetch(fcmUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ message }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error("FCM error:", result);
+      return new Response(JSON.stringify({ error: result }), {
+        status: response.status,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    console.error("Error:", e);
+    return new Response(JSON.stringify({ error: (e as Error).message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+});
