@@ -51,9 +51,41 @@ This document outlines additional architectural, performance, and user-experienc
     *   Add `lastUpdatedAt` timestamps to local settings.
     *   Implement a background sync service to compare local and remote settings on app launch.
 
-### F. Dynamic Theme Customization
-*   **What**: Move beyond light/dark toggle to allow user-selected accent colors.
-*   **Why**: Modern users expect personalization.
+### G. Message Content Indexing (Full-Text Search)
+*   **What**: Implement full-text search capabilities for chat messages using a dedicated search service.
+*   **Why**: Firestore's native querying is limited for message content search. Users expect a robust "search within chat" feature.
 *   **Details**:
-    *   Extend `AppCubit` to store an `accentColor` index in `SharedPreferences`.
-    *   Use `ColorScheme.fromSeed` to dynamically generate a theme based on the user's chosen seed color.
+    *   Integrate a search-as-a-service solution (e.g., Algolia or Typesense).
+    *   Use Firebase Cloud Functions to sync Firestore message documents to the search index upon creation/update.
+
+### H. Advanced Presence & Activity Indicators
+*   **What**: Fine-grained user activity reporting beyond "online/offline".
+*   **Why**: Improves trust and reduces uncertainty in real-time communication.
+*   **Details**:
+    *   Add "Recording voice message..." indicator.
+    *   Add "Currently active in group X" context indicator.
+    *   Implement efficient presence management using the Realtime Database or specialized Firestore triggers to avoid excessive document writes.
+
+### I. Security Hardening: Certificate Pinning
+*   **What**: Implement SSL/TLS certificate pinning for all API requests.
+*   **Why**: Protects against Man-in-the-Middle (MitM) attacks, ensuring traffic only goes to your legitimate backend infrastructure.
+*   **Details**:
+    *   Use a package like `dio_certificate_pinning` to enforce valid certificates for Supabase and Firebase interactions.
+
+---
+
+## 4. Maintenance & Operations
+
+### J. Localization/i18n Expansion
+*   **What**: Expand beyond Arabic/English to include support for other major languages.
+*   **Why**: Increases market reach.
+*   **Details**:
+    *   Utilize `flutter_localizations` properly.
+    *   Implement an automated workflow for string extraction and translation management (e.g., via Crowdin or Lokalise).
+
+### K. Automated Dependency Management
+*   **What**: Set up automated dependency updates (e.g., Dependabot or Renovate).
+*   **Why**: Reduces the risk of using outdated, vulnerable, or incompatible packages.
+*   **Details**:
+    *   Configure the tool to automatically create PRs for dependency updates.
+    *   Integrate with CI/CD to run tests automatically on updated dependencies.

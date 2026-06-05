@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "base44-docs": {
+      "url": "https://docs.base44.com/mcp",
+      "type": "http"
+    },
+    "base44": {
+      "url": "https://app.base44.com/mcp",
+      "type": "http",
+      "headers": {
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJxem1hc2hhcmExOTk3MDBAZ21haWwuY29tIiwiZXhwIjoxNzgxOTU5NjM5LCJpYXQiOjE3NzkzNjc2MzksImF1ZCI6InBsYXRmb3JtIiwic2NvcGUiOiJhcHBzOndyaXRlIGFwcHM6cmVhZCIsImNsaWVudF9pZCI6ImJhc2U0NF9jbGkifQ.C7lQhbFcH-2v-Ah2Wh7SzysxUA-5PzFAPB5cK5X6oBs"
+      }
+    }
+  }
+}

@@ -93,6 +93,8 @@ dependencies:
   google_generative_ai: ^0.4.7
   flutter_image_compress: ^2.4.0
   firebase_crashlytics: ^5.2.3
+  algoliasearch: ^1.49.2
+  http_certificate_pinning: ^3.0.1
 
 dev_dependencies:
   flutter_test:

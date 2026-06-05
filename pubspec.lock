@@ -25,6 +25,38 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.5.3"
+  algolia_client_core:
+    dependency: transitive
+    description:
+      name: algolia_client_core
+      sha256: "027c481a826fef3693a9374d4275bc89b1595f4e065915760512316910ce74cb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.49.2"
+  algolia_client_insights:
+    dependency: transitive
+    description:
+      name: algolia_client_insights
+      sha256: "6ec022b7bf41f00fcce7146baaa2f002e48459c1d566a56928f63a27ae46c349"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.49.2"
+  algolia_client_search:
+    dependency: transitive
+    description:
+      name: algolia_client_search
+      sha256: "97872b4c487e204b0ee7d58229e82f4f79f4123ec42d21aaa7c0ce590fcf1248"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.49.2"
+  algoliasearch:
+    dependency: "direct main"
+    description:
+      name: algoliasearch
+      sha256: "76e64c5582f30c63f9771c3888d81b3a514222765e3b88ceec3f808e677f8431"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.49.2"
   analyzer:
     dependency: transitive
     description:
@@ -1004,6 +1036,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.6.0"
+  http_certificate_pinning:
+    dependency: "direct main"
+    description:
+      name: http_certificate_pinning
+      sha256: "1501c69142a3906a5ad4876d7e71696fa6a6a187fc6f4a746d7a5ba32f9f8fcf"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.1"
   http_multi_server:
     dependency: transitive
     description:
