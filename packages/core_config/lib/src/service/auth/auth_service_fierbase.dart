@@ -52,10 +52,18 @@ class FirebaseAuthService implements AuthService {
     FirebaseAuth? firebaseAuth,
     GoogleSignIn? googleSignIn,
   })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        _googleSignIn = googleSignIn ?? GoogleSignIn();
+        _googleSignIn = googleSignIn ?? GoogleSignIn.instance;
 
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
+
+  bool _isGoogleSignInInitialized = false;
+
+  Future<void> _ensureGoogleSignInInitialized() async {
+    if (_isGoogleSignInInitialized) return;
+    await _googleSignIn.initialize();
+    _isGoogleSignInInitialized = true;
+  }
 
   @override
   User? get currentUser => _firebaseAuth.currentUser;
@@ -100,23 +108,25 @@ class FirebaseAuthService implements AuthService {
   @override
   Future<UserCredential> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      await _ensureGoogleSignInInitialized();
 
-      if (googleUser == null) {
-        throw AuthException('Google sign in was cancelled.');
-      }
+      final GoogleSignInAccount googleUser =
+          await _googleSignIn.authenticate();
 
-      final GoogleSignInAuthentication googleAuth =
-          googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
       final OAuthCredential credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
-        accessToken: googleAuth.accessToken,
       );
 
       return await _firebaseAuth.signInWithCredential(credential);
     } on FirebaseAuthException catch (e) {
       throw AuthException(_mapFirebaseAuthError(e));
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        throw AuthException('Google sign in was cancelled.');
+      }
+      throw AuthException('Google sign in failed. Please try again.');
     } catch (e) {
       if (e is AuthException) rethrow;
       throw AuthException('Google sign in failed. Please try again.');
@@ -282,6 +292,7 @@ class FirebaseAuthService implements AuthService {
   @override
   Future<void> signOut() async {
     try {
+      await _ensureGoogleSignInInitialized();
       await Future.wait([
         _firebaseAuth.signOut(),
         _googleSignIn.signOut(),

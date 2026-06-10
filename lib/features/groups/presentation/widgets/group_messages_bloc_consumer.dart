@@ -12,7 +12,6 @@ import 'package:chat_material3/features/single_chat/presentation/bloc/block_cubi
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:chat_material3/core/common/widgets/chat/message_read_status.dart';
 import 'package:chat_material3/core/di/injection_container.dart';
 import 'package:intl/intl.dart';
 

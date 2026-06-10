@@ -13,7 +13,12 @@ part of 'upload_image_cubit.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
-mixin _$UploadImageState {
+mixin _$UploadImageState implements DiagnosticableTreeMixin {
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties..add(DiagnosticsProperty('type', 'UploadImageState'));
+  }
+
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
@@ -24,7 +29,7 @@ mixin _$UploadImageState {
   int get hashCode => runtimeType.hashCode;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'UploadImageState()';
   }
 }
@@ -284,8 +289,13 @@ extension UploadImageStatePatterns on UploadImageState {
 
 /// @nodoc
 
-class _Initial implements UploadImageState {
+class _Initial with DiagnosticableTreeMixin implements UploadImageState {
   const _Initial();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties..add(DiagnosticsProperty('type', 'UploadImageState.initial'));
+  }
 
   @override
   bool operator ==(Object other) {
@@ -297,15 +307,20 @@ class _Initial implements UploadImageState {
   int get hashCode => runtimeType.hashCode;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'UploadImageState.initial()';
   }
 }
 
 /// @nodoc
 
-class LoadingState implements UploadImageState {
+class LoadingState with DiagnosticableTreeMixin implements UploadImageState {
   const LoadingState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties..add(DiagnosticsProperty('type', 'UploadImageState.loading'));
+  }
 
   @override
   bool operator ==(Object other) {
@@ -317,14 +332,16 @@ class LoadingState implements UploadImageState {
   int get hashCode => runtimeType.hashCode;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'UploadImageState.loading()';
   }
 }
 
 /// @nodoc
 
-class LoadingListState implements UploadImageState {
+class LoadingListState
+    with DiagnosticableTreeMixin
+    implements UploadImageState {
   const LoadingListState(this.index);
 
   final int index;
@@ -335,6 +352,13 @@ class LoadingListState implements UploadImageState {
   @pragma('vm:prefer-inline')
   $LoadingListStateCopyWith<LoadingListState> get copyWith =>
       _$LoadingListStateCopyWithImpl<LoadingListState>(this, _$identity);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', 'UploadImageState.loadingList'))
+      ..add(DiagnosticsProperty('index', index));
+  }
 
   @override
   bool operator ==(Object other) {
@@ -348,7 +372,7 @@ class LoadingListState implements UploadImageState {
   int get hashCode => Object.hash(runtimeType, index);
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'UploadImageState.loadingList(index: $index)';
   }
 }
@@ -388,8 +412,13 @@ class _$LoadingListStateCopyWithImpl<$Res>
 
 /// @nodoc
 
-class SuccessState implements UploadImageState {
+class SuccessState with DiagnosticableTreeMixin implements UploadImageState {
   const SuccessState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties..add(DiagnosticsProperty('type', 'UploadImageState.success'));
+  }
 
   @override
   bool operator ==(Object other) {
@@ -401,14 +430,14 @@ class SuccessState implements UploadImageState {
   int get hashCode => runtimeType.hashCode;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'UploadImageState.success()';
   }
 }
 
 /// @nodoc
 
-class RemovemageState implements UploadImageState {
+class RemovemageState with DiagnosticableTreeMixin implements UploadImageState {
   const RemovemageState({required this.imageUrl});
 
   final String imageUrl;
@@ -419,6 +448,13 @@ class RemovemageState implements UploadImageState {
   @pragma('vm:prefer-inline')
   $RemovemageStateCopyWith<RemovemageState> get copyWith =>
       _$RemovemageStateCopyWithImpl<RemovemageState>(this, _$identity);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', 'UploadImageState.removeImage'))
+      ..add(DiagnosticsProperty('imageUrl', imageUrl));
+  }
 
   @override
   bool operator ==(Object other) {
@@ -433,7 +469,7 @@ class RemovemageState implements UploadImageState {
   int get hashCode => Object.hash(runtimeType, imageUrl);
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'UploadImageState.removeImage(imageUrl: $imageUrl)';
   }
 }
@@ -473,7 +509,7 @@ class _$RemovemageStateCopyWithImpl<$Res>
 
 /// @nodoc
 
-class ErrorState implements UploadImageState {
+class ErrorState with DiagnosticableTreeMixin implements UploadImageState {
   const ErrorState({required this.error});
 
   final String error;
@@ -484,6 +520,13 @@ class ErrorState implements UploadImageState {
   @pragma('vm:prefer-inline')
   $ErrorStateCopyWith<ErrorState> get copyWith =>
       _$ErrorStateCopyWithImpl<ErrorState>(this, _$identity);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', 'UploadImageState.error'))
+      ..add(DiagnosticsProperty('error', error));
+  }
 
   @override
   bool operator ==(Object other) {
@@ -497,7 +540,7 @@ class ErrorState implements UploadImageState {
   int get hashCode => Object.hash(runtimeType, error);
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'UploadImageState.error(error: $error)';
   }
 }

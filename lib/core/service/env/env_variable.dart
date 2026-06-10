@@ -19,6 +19,7 @@ class EnvVariable {
   final String _buildDeveloper = '';
   String _geminiApiKey = '';
   String _supabaseAnonKey = '';
+  String _supabaseUrl = '';
   String _agoraAppId = '';
 
   Future<void> init({required EnvTypeEnum envType}) async {
@@ -36,15 +37,18 @@ class EnvVariable {
     _notifcationBaseUrl = dotenv.get('NOTFICATION_BASEURL');
     _geminiApiKey = dotenv.get('GEMINI_API_KEY', fallback: '');
     _supabaseAnonKey = dotenv.get('SUPABASE_ANON_KEY');
+    _supabaseUrl = dotenv.get('SUPABASE_URL');
     _agoraAppId = dotenv.get('AGORA_APP_ID');
   }
 
   bool get debugMode => _envType == 'dev';
+  bool get isProd => _envType == 'prod';
   // CHANGE: Add getters for your project-specific env variables
   String get notifcationBaseUrl => _notifcationBaseUrl;
   String get firebaseKey => _firebaseKey;
   String get buildDeveloper => _buildDeveloper;
   String get geminiApiKey => _geminiApiKey;
   String get supabaseAnonKey => _supabaseAnonKey;
+  String get supabaseUrl => _supabaseUrl;
   String get agoraAppId => _agoraAppId;
 }

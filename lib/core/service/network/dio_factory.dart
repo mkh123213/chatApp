@@ -4,8 +4,11 @@
 // CHANGE: Update the 401/400 error handling (AppLogout) to your project's logout logic.
 // ignore_for_file: lines_longer_than_80_chars
 
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:chat_material3/core/service/shared_pref/pref_keys.dart';
@@ -19,18 +22,17 @@ class DioFactory {
 
   static Dio getDio() {
     const timeOut = Duration(seconds: 30);
-    // (dio!.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
-    //     (client) {
-    //       client.badCertificateCallback = (cert, host, port) => true;
-    //       return null; // Trust all certificates
-    //     };
     if (dio == null) {
       dio = Dio();
-      (dio!.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
-          (client) {
-        client.badCertificateCallback = (cert, host, port) => true;
-        return null; // Trust all certificates
-      };
+      // SECURITY: only bypass TLS certificate validation in debug builds
+      // (e.g. local self-signed servers). Release builds use full validation.
+      if (kDebugMode) {
+        (dio!.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+          final client = HttpClient();
+          client.badCertificateCallback = (cert, host, port) => true;
+          return client;
+        };
+      }
       dio!
         ..options.connectTimeout = timeOut
         ..options.receiveTimeout = timeOut;

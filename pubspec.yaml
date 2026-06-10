@@ -135,7 +135,6 @@ flutter:
     - .env.dev
     - lang/en.json
     - lang/ar.json
-    - assets/store-app-c9001-fa3b97881677.json
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -1,4 +1,6 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:chat_material3/chat_app.dart';
 import 'package:chat_material3/core/app/app_cubit/cubit/app_cubit.dart';
@@ -26,13 +28,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await EnvVariable.instance.init(envType: EnvTypeEnum.dev);
-  //
-  //  "current_key": "AIzaSyBDzognjD6pwp6oKKOoEkklgOunZo3W-fs" ==> apiKey
-  //  "mobilesdk_app_id": "1:255535904497:android:bf1c974c2689a199431b50" ==> appId
-  // "project_number": "255535904497" ==> messagingSenderId
-  // "project_id": "asroo-dev" ==> projectId
+
   await Firebase.initializeApp().whenComplete(() async {
-    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+    // Only collect crashes in release builds of the prod flavor.
+    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
+      !kDebugMode && EnvVariable.instance.isProd,
+    );
     PlatformDispatcher.instance.onError = (error, stack) {
       FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
       return true;
@@ -40,20 +41,46 @@ void main() async {
     FirebaseCloudMessaging().init();
     LocalNotificationService.init();
   });
-  await Supabase.initialize(
-    url: 'https://nkzezuvubeloiglhdpfu.supabase.co',
-    anonKey: EnvVariable.instance.supabaseAnonKey,
+
+  // Enable offline persistence so chats work without a connection and
+  // outgoing writes are queued until reconnect.
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: true,
+    cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
   );
-  // Platform.isAndroid
-  //     ? await Firebase.initializeApp()
-  //     : await Firebase.initializeApp();
-  await CallKitService.instance.init();
-  await SharedPref().instantiatePreferences();
+
+  // Fail loud and early if Supabase isn't configured — otherwise the first
+  // sign of trouble is a confusing "not authorized" when uploading media.
+  final supabaseKey = EnvVariable.instance.supabaseAnonKey;
+  if (supabaseKey.isEmpty || supabaseKey.contains('your_')) {
+    debugPrint(
+      '\n========================================================\n'
+      '⚠️  SUPABASE_ANON_KEY is missing or still a placeholder.\n'
+      '    File: .env.dev / .env.prod\n'
+      '    Get the real key from: Supabase Dashboard →\n'
+      '    Project Settings → API → "anon public".\n'
+      '    Image/file/voice uploads WILL FAIL until this is set.\n'
+      '========================================================\n',
+    );
+  }
+
+  await Supabase.initialize(
+    url: EnvVariable.instance.supabaseUrl,
+    anonKey: supabaseKey,
+  );
+
+  // SharedPreferences must be ready before the DI container is built, because
+  // DioFactory (created during setupInjector) reads SharedPref synchronously.
+  // CallKit and Hive are independent, so run them alongside it.
+  await Future.wait([
+    SharedPref().instantiatePreferences(),
+    CallKitService.instance.init(),
+    HiveDatabase().setup(),
+  ]);
+
   await setupInjector();
 
-  // await setupInjector();
-
-  await HiveDatabase().setup();
+  // Non-critical background services — fire-and-forget, must not block startup.
   DndService().init();
   WallpaperService().init();
 

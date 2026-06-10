@@ -1,21 +1,24 @@
-import 'package:algoliasearch/algoliasearch.dart';
+import 'package:algoliasearch/algoliasearch_lite.dart';
 
 class AlgoliaSearchService {
-  final AlgoliaSearchClient _client;
+  final SearchClient _client;
 
   AlgoliaSearchService({
     required String appId,
     required String apiKey,
-  }) : _client = AlgoliaSearchClient(appID: appId, apiKey: apiKey);
+  }) : _client = SearchClient(appId: appId, apiKey: apiKey);
 
   Future<void> indexMessage(Map<String, dynamic> message, String indexName) async {
-    await _client.saveObject(indexName: indexName, body: message);
+    await _client.customPost(
+      path: '1/indexes/$indexName',
+      body: message,
+    );
   }
 
   Future<List<Map<String, dynamic>>> searchMessages(String query, String indexName) async {
-    final response = await _client.searchSingleIndex(
+    final response = await _client.searchIndex(
       request: SearchForHits(indexName: indexName, query: query),
     );
-    return response.hits;
+    return response.hits.map((hit) => hit.toJson()).toList();
   }
 }

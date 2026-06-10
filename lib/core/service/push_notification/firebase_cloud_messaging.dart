@@ -57,9 +57,9 @@ class FirebaseCloudMessaging {
   Future<void> controllerForUserSubscribe(BuildContext context) async {
     if (isPermissionNotification == false) {
       await _permissionsNotification();
-      print("isPermissionNotification = $isPermissionNotification");
+      debugPrint("isPermissionNotification = $isPermissionNotification");
     } else {
-      print("isPermissionNotification = $isPermissionNotification");
+      debugPrint("isPermissionNotification = $isPermissionNotification");
 
       if (isNotificationSubscribe.value == false) {
         await _subscribeNotification();

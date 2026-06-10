@@ -162,7 +162,9 @@ class _SingleChatScreenState extends State<SingleChatScreen> {
           ),
         ],
         child: Builder(
-            builder: (context) => Column(
+            builder: (context) => Scaffold(
+                  backgroundColor: context.color.surface,
+                  body: Column(
                   children: [
                     _SingleChatHeader(
                       chat: chat,
@@ -172,8 +174,8 @@ class _SingleChatScreenState extends State<SingleChatScreen> {
                     Expanded(
                       child: ValueListenableBuilder<int>(
                         valueListenable: WallpaperService().selectedIndex,
-                        builder: (_, __, ___) => Container(
-                          decoration: WallpaperService().decoration,
+                        builder: (context, __, ___) => Container(
+                          decoration: WallpaperService().decorationFor(context),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 5),
@@ -304,7 +306,7 @@ class _SingleChatScreenState extends State<SingleChatScreen> {
                       ),
                     ),
                   ],
-                )),
+                ))),
       ),
     );
   }

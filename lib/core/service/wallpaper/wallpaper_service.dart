@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:chat_material3/core/extensions/context_extension.dart';
 import 'package:chat_material3/core/service/shared_pref/pref_keys.dart';
 import 'package:chat_material3/core/service/shared_pref/shared_pref.dart';
 
@@ -48,6 +49,8 @@ class WallpaperService {
 
   WallpaperOption get current => options[selectedIndex.value];
 
+  bool get isDefault => selectedIndex.value == 0;
+
   BoxDecoration get decoration {
     final opt = current;
     if (opt.isGradient) {
@@ -60,5 +63,15 @@ class WallpaperService {
       );
     }
     return BoxDecoration(color: opt.colors.first);
+  }
+
+  /// Theme-aware decoration: the built-in "Default" wallpaper follows the app
+  /// theme so dark mode renders a dark chat background instead of a hardcoded
+  /// light grey. Custom wallpapers are returned unchanged.
+  BoxDecoration decorationFor(BuildContext context) {
+    if (isDefault) {
+      return BoxDecoration(color: context.color.surface);
+    }
+    return decoration;
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:chat_material3/core/service/network/api_result.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:chat_material3/core/app/upload_image/repo/upload_image_repo.dart';
@@ -34,7 +35,7 @@ class UploadImageCubit extends Cubit<UploadImageState> {
         emit(const UploadImageState.success());
       },
       failure: (error) {
-        print(error);
+        debugPrint(error);
 
         emit(UploadImageState.error(error: error));
       },
@@ -53,7 +54,7 @@ class UploadImageCubit extends Cubit<UploadImageState> {
       success: (image) {
         imageList
           ..removeAt(indexId)
-          ..insert(indexId, image.storagePath ?? '');
+          ..insert(indexId, image.storagePath);
         emit(const UploadImageState.success());
       },
       failure: (error) {
@@ -78,7 +79,7 @@ class UploadImageCubit extends Cubit<UploadImageState> {
         imageUpdateList = productImageList;
         imageUpdateList
           ..removeAt(indexId)
-          ..insert(indexId, image.storagePath ?? '');
+          ..insert(indexId, image.storagePath);
         emit(const UploadImageState.success());
       },
       failure: (error) {

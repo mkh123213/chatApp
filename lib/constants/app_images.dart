@@ -102,10 +102,6 @@ class Assets {
   /// assets/images/customer/user.png
   static const String assetsImagesCustomerUser = "assets/images/customer/user.png";
 
-  /// Assets for assetsStoreAppC9001Fa3b97881677
-  /// assets/store-app-c9001-fa3b97881677.json
-  static const String assetsStoreAppC9001Fa3b97881677 = "assets/store-app-c9001-fa3b97881677.json";
-
   /// Assets for assetsSvgArrowBack
   /// assets/svg/arrow_back.svg
   static const String assetsSvgArrowBack = "assets/svg/arrow_back.svg";

@@ -9,6 +9,14 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  # Generated code shouldn't be analyzed — it's owned by the generators
+  # (build_runner / freezed / json_serializable) and not hand-maintained.
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "lib/constants/app_images.dart"
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`

@@ -12,14 +12,17 @@ class MessagesCubit extends Cubit<MessagesState> {
       : _messagesRepo = messagesRepo,
         super(const MessagesInitial());
 
+  static const _pageSize = 30;
+
   final MessagesRepo _messagesRepo;
   StreamSubscription<List<MessageModel>>? _messagesSubscription;
-  String? _activeChatId;
-  String? _activeUserId;
   int? _disappearingDuration;
-  
-  List<MessageModel> _messages = [];
+
+  // Single source of truth, keyed by message id to guarantee de-duplication
+  // across the live (newest) window and paginated history.
+  final Map<String, MessageModel> _messagesById = {};
   DocumentSnapshot? _lastDocument;
+  bool _hasMore = true;
 
   void setDisappearingDuration(int? duration) {
     _disappearingDuration = duration;
@@ -34,30 +37,54 @@ class MessagesCubit extends Cubit<MessagesState> {
     return messages.where((m) => m.createdAt.isAfter(cutoff)).toList();
   }
 
+  /// Newest-first, de-duplicated, with disappearing messages filtered out.
+  List<MessageModel> _visibleMessages() {
+    final list = _messagesById.values.toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return _filterExpired(list);
+  }
+
+  /// Merges the latest live window into the store and reconciles deletions
+  /// that happened within that window (messages no longer present are removed).
+  void _applyLiveBatch(List<MessageModel> live) {
+    if (live.isNotEmpty) {
+      final oldestLive = live
+          .map((m) => m.createdAt)
+          .reduce((a, b) => a.isBefore(b) ? a : b);
+      final liveIds = live.map((m) => m.id).toSet();
+      // Anything at or newer than the live window that's missing was deleted.
+      _messagesById.removeWhere((id, m) =>
+          !m.createdAt.isBefore(oldestLive) && !liveIds.contains(id));
+    }
+    for (final m in live) {
+      _messagesById[m.id] = m;
+    }
+  }
+
   void loadMessages({required String chatId}) {
     emit(const MessagesLoading());
-    _messages = [];
+    _messagesById.clear();
     _lastDocument = null;
+    _hasMore = true;
 
-    _messagesSubscription =
-        _messagesRepo.getMessages(chatId: chatId).listen(
+    _messagesSubscription = _messagesRepo.getMessages(chatId: chatId).listen(
       (messages) {
         if (isClosed) return;
-        
-        // This stream only emits the latest 30 messages.
-        // We need to merge them with our paginated history.
-        // This is complex. For now, let's just use the stream for the latest 30.
-        
-        final filtered = _filterExpired(messages);
-        _messages = filtered; 
-        
-        if (_messages.isEmpty) {
+
+        _applyLiveBatch(messages);
+        final visible = _visibleMessages();
+
+        if (visible.isEmpty) {
           emit(const MessagesEmpty());
         } else {
-          emit(MessagesLoaded(messages: _messages, hasMore: true));
+          final selected =
+              state is MessagesLoaded ? (state as MessagesLoaded).selectedIds : const <String>{};
+          emit(MessagesLoaded(
+            messages: visible,
+            selectedIds: selected,
+            hasMore: _hasMore,
+          ));
         }
-        
-        // ... mark as read ...
       },
       onError: (error) {
         if (isClosed) return;
@@ -67,34 +94,52 @@ class MessagesCubit extends Cubit<MessagesState> {
   }
 
   Future<void> loadMoreMessages({required String chatId}) async {
-    if (state is MessagesLoaded) {
-      final loadedState = state as MessagesLoaded;
-      if (!loadedState.hasMore || loadedState.isLoadingMore) return;
+    final current = state;
+    if (current is! MessagesLoaded) return;
+    if (!_hasMore || current.isLoadingMore) return;
 
-      emit(loadedState.copyWith(isLoadingMore: true));
+    emit(current.copyWith(isLoadingMore: true));
 
-      final snapshot = await _messagesRepo.getMessagesPage(
-        chatId: chatId,
-        limit: 30,
-        lastDocument: _lastDocument,
-      );
+    try {
+      var addedNew = false;
 
-      final newMessages = snapshot.docs
-          .map((doc) => MessageModel.fromFirestore(
-              id: doc.id, data: doc.data() as Map<String, dynamic>))
-          .toList();
+      // The first page overlaps the live window; keep paging until we load
+      // messages we don't already have (or reach the end).
+      while (!addedNew && _hasMore) {
+        final snapshot = await _messagesRepo.getMessagesPage(
+          chatId: chatId,
+          limit: _pageSize,
+          lastDocument: _lastDocument,
+        );
 
-      if (newMessages.isNotEmpty) {
+        if (snapshot.docs.isEmpty) {
+          _hasMore = false;
+          break;
+        }
+
         _lastDocument = snapshot.docs.last;
-        _messages.addAll(newMessages);
-        emit(loadedState.copyWith(
-          messages: List.from(_messages),
-          isLoadingMore: false,
-          hasMore: newMessages.length == 30,
-        ));
-      } else {
-        emit(loadedState.copyWith(isLoadingMore: false, hasMore: false));
+        _hasMore = snapshot.docs.length == _pageSize;
+
+        for (final doc in snapshot.docs) {
+          final m = MessageModel.fromFirestore(
+            id: doc.id,
+            data: doc.data() as Map<String, dynamic>,
+          );
+          if (!_messagesById.containsKey(m.id)) addedNew = true;
+          _messagesById[m.id] = m;
+        }
       }
+
+      if (isClosed) return;
+      emit(MessagesLoaded(
+        messages: _visibleMessages(),
+        selectedIds: current.selectedIds,
+        hasMore: _hasMore,
+        isLoadingMore: false,
+      ));
+    } catch (error) {
+      if (isClosed) return;
+      emit(current.copyWith(isLoadingMore: false));
     }
   }
 
@@ -107,20 +152,14 @@ class MessagesCubit extends Cubit<MessagesState> {
       } else {
         updated.add(messageId);
       }
-      emit(MessagesLoaded(
-        messages: currentState.messages,
-        selectedIds: updated,
-      ));
+      emit(currentState.copyWith(selectedIds: updated));
     }
   }
 
   void clearSelection() {
     final currentState = state;
     if (currentState is MessagesLoaded) {
-      emit(MessagesLoaded(
-        messages: currentState.messages,
-        selectedIds: const {},
-      ));
+      emit(currentState.copyWith(selectedIds: const {}));
     }
   }
 
@@ -128,8 +167,6 @@ class MessagesCubit extends Cubit<MessagesState> {
     required String chatId,
     required String currentUserId,
   }) async {
-    _activeChatId = chatId;
-    _activeUserId = currentUserId;
     await _messagesRepo.markMessagesAsRead(
       chatId: chatId,
       currentUserId: currentUserId,

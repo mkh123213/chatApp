@@ -646,11 +646,15 @@ class MessagesRemoteDataSourceImpl implements MessagesRemoteDataSource {
         .where('isRead', isEqualTo: false)
         .get();
 
-    final batch = FirebaseFirestore.instance.batch();
-    for (final doc in snapshot.docs) {
-      batch.update(doc.reference, {'isRead': true});
+    // Firestore caps a WriteBatch at 500 operations; commit in chunks.
+    const chunkSize = 450;
+    for (var i = 0; i < snapshot.docs.length; i += chunkSize) {
+      final batch = FirebaseFirestore.instance.batch();
+      for (final doc in snapshot.docs.skip(i).take(chunkSize)) {
+        batch.update(doc.reference, {'isRead': true});
+      }
+      await batch.commit();
     }
-    await batch.commit();
   }
 
   @override
@@ -659,12 +663,17 @@ class MessagesRemoteDataSourceImpl implements MessagesRemoteDataSource {
     required List<String> messageIds,
   }) async {
     if (messageIds.isEmpty) return;
-    final batch = FirebaseFirestore.instance.batch();
     final collectionRef = FirebaseFirestore.instance
         .collection('$chatsCollection/$chatId/$messagesCollection');
-    for (final id in messageIds) {
-      batch.update(collectionRef.doc(id), {'isRead': true});
+
+    // Firestore caps a WriteBatch at 500 operations; commit in chunks.
+    const chunkSize = 450;
+    for (var i = 0; i < messageIds.length; i += chunkSize) {
+      final batch = FirebaseFirestore.instance.batch();
+      for (final id in messageIds.skip(i).take(chunkSize)) {
+        batch.update(collectionRef.doc(id), {'isRead': true});
+      }
+      await batch.commit();
     }
-    await batch.commit();
   }
 }

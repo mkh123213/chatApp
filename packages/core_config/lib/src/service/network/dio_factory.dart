@@ -3,8 +3,11 @@
 // CHANGE: Pass your token getter and unauthorized handler when calling getDio().
 // ignore_for_file: lines_longer_than_80_chars
 
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class DioFactory {
@@ -21,11 +24,15 @@ class DioFactory {
 
     if (dio == null) {
       dio = Dio();
-      (dio!.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
-          (client) {
-        client.badCertificateCallback = (cert, host, port) => true;
-        return null;
-      };
+      // SECURITY: only bypass TLS validation in debug builds; release builds
+      // use full certificate validation.
+      if (kDebugMode) {
+        (dio!.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+          final client = HttpClient();
+          client.badCertificateCallback = (cert, host, port) => true;
+          return client;
+        };
+      }
       dio!
         ..options.connectTimeout = timeOut
         ..options.receiveTimeout = timeOut;
