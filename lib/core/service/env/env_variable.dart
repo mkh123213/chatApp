@@ -20,7 +20,8 @@ class EnvVariable {
   String _geminiApiKey = '';
   String _supabaseAnonKey = '';
   String _supabaseUrl = '';
-  String _agoraAppId = '';
+  int _zegoAppId = 0;
+  String _zegoAppSign = '';
 
   Future<void> init({required EnvTypeEnum envType}) async {
     switch (envType) {
@@ -38,7 +39,8 @@ class EnvVariable {
     _geminiApiKey = dotenv.get('GEMINI_API_KEY', fallback: '');
     _supabaseAnonKey = dotenv.get('SUPABASE_ANON_KEY');
     _supabaseUrl = dotenv.get('SUPABASE_URL');
-    _agoraAppId = dotenv.get('AGORA_APP_ID');
+    _zegoAppId = int.tryParse(dotenv.get('ZEGO_APP_ID', fallback: '0')) ?? 0;
+    _zegoAppSign = dotenv.get('ZEGO_APP_SIGN', fallback: '');
   }
 
   bool get debugMode => _envType == 'dev';
@@ -50,5 +52,6 @@ class EnvVariable {
   String get geminiApiKey => _geminiApiKey;
   String get supabaseAnonKey => _supabaseAnonKey;
   String get supabaseUrl => _supabaseUrl;
-  String get agoraAppId => _agoraAppId;
+  int get zegoAppId => _zegoAppId;
+  String get zegoAppSign => _zegoAppSign;
 }

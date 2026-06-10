@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:chat_material3/core/service/call_service/callkit_service.dart';
 import 'package:chat_material3/core/di/injection_container.dart';
 import 'package:chat_material3/core/helper_functions/get_current_user.dart';
-import 'package:chat_material3/core/service/call_service/agora_token_service.dart';
 import 'package:chat_material3/core/service/call_service/call_provider_service.dart';
 import 'package:chat_material3/features/calls/data/models/call_model.dart';
 import 'package:chat_material3/features/calls/data/models/call_status.dart';
@@ -103,16 +102,12 @@ class _CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
 
     final uid = _stableUidHash(getCurrentUser().uid);
     final channelId = widget.call.channelId;
-    final tokenService = AgoraTokenService();
-    final token = await tokenService.generateToken(
-      channelName: channelId,
-      uid: uid,
-    );
 
+    // Zego uses AppSign authentication — no token server needed (token stays empty).
     await _callProvider.initialize();
     await _callProvider.joinChannel(
       channelId: channelId,
-      token: token,
+      token: '',
       uid: uid,
       isVideo: isVideo,
     );

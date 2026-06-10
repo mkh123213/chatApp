@@ -39,7 +39,7 @@ import 'package:chat_material3/features/status/presentation/bloc/create_status_c
 import 'package:chat_material3/features/status/presentation/bloc/my_status_cubit/my_status_cubit.dart';
 import 'package:chat_material3/features/status/presentation/bloc/status_cubit/status_cubit.dart';
 import 'package:chat_material3/core/service/call_service/call_provider_service.dart';
-import 'package:chat_material3/core/service/call_service/agora_call_provider_service.dart';
+import 'package:chat_material3/core/service/zegocaller/zego_call_provider_service.dart';
 import 'package:chat_material3/features/calls/data/datasources/calls_remote_data_source.dart';
 import 'package:chat_material3/features/calls/data/repositories/calls_repo.dart';
 import 'package:chat_material3/features/calls/presentation/bloc/start_call_cubit/start_call_cubit.dart';
@@ -233,7 +233,7 @@ Future<void> _initAuth() async {
 Future<void> _initCalls() async {
   sl
     ..registerLazySingleton<CallProviderService>(
-      () => AgoraCallProviderService(),
+      () => ZegoCallProviderService(),
     )
     ..registerLazySingleton<CallsRemoteDataSource>(
       () => CallsRemoteDataSourceImpl(
