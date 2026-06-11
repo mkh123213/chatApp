@@ -3,7 +3,7 @@ name: Android Fastlane with Firebase App Distribution Workflow
 on:
   push:
     branches:
-      - use-gemeni-to-complete--enhacments-phases-
+      - add-zego-call-service-instead-of-agora-
 
 jobs:
   distribute_to_firebase:

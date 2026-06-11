@@ -6,6 +6,7 @@ import 'package:chat_material3/core/service/hive/hive_database.dart';
 import 'package:chat_material3/core/service/shared_pref/pref_keys.dart';
 import 'package:chat_material3/core/service/shared_pref/shared_pref.dart';
 import 'package:chat_material3/core/service/user_presence/user_presence_service.dart';
+import 'package:chat_material3/core/service/call_service/zego_call_invitation_service.dart';
 
 class AppLogout {
   factory AppLogout() {
@@ -21,6 +22,7 @@ class AppLogout {
     if (navState == null) return;
 
     sl<UserPresenceService>().stop();
+    await ZegoCallInvitationService.instance.onUserLogout();
 
     // Navigate away first so widgets that depend on currentUser are removed
     await navState.pushNamedAndRemoveUntil(AppRoutes.logIn, (route) => false);

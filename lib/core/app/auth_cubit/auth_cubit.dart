@@ -10,6 +10,7 @@ import 'package:chat_material3/core/service/shared_pref/shared_pref.dart';
 import 'package:chat_material3/core/di/injection_container.dart';
 import 'package:chat_material3/core/service/push_notification/chat_notification_service.dart';
 import 'package:chat_material3/core/service/user_presence/user_presence_service.dart';
+import 'package:chat_material3/core/service/call_service/zego_call_invitation_service.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'auth_state.dart';
@@ -50,6 +51,10 @@ class AuthCubit extends Cubit<AuthState> {
       );
       sl<UserPresenceService>().start(userId: userModel.uid);
       ChatNotificationService.instance.saveFcmToken(userId: userModel.uid);
+      await ZegoCallInvitationService.instance.onUserLogin(
+        userId: userModel.uid,
+        userName: userModel.name ?? userModel.uid,
+      );
       emit(const AuthState.authenticated());
     } catch (e) {
       emit(AuthState.error(message: e.toString()));
@@ -62,6 +67,7 @@ class AuthCubit extends Cubit<AuthState> {
     emit(const AuthState.loading());
     try {
       sl<UserPresenceService>().stop();
+      await ZegoCallInvitationService.instance.onUserLogout();
       await authService.signOut();
       SharedPref().clearPreferences();
       emit(const AuthState.unauthenticated());
@@ -110,6 +116,10 @@ class AuthCubit extends Cubit<AuthState> {
 
       sl<UserPresenceService>().start(userId: userModel.uid);
       ChatNotificationService.instance.saveFcmToken(userId: userModel.uid);
+      await ZegoCallInvitationService.instance.onUserLogin(
+        userId: userModel.uid,
+        userName: userModel.name ?? userModel.uid,
+      );
 
       emit(const AuthState.authenticated());
     } catch (e) {
@@ -189,6 +199,18 @@ class AuthCubit extends Cubit<AuthState> {
     emit(const AuthState.loading());
     try {
       await authService.signInWithGoogle();
+      // Best-effort: arm call invitations if the user was persisted. On cold
+      // start main.dart re-arms it regardless.
+      final userJson = SharedPref().getString(PrefKeys.currentUser);
+      if (userJson != null && userJson.isNotEmpty) {
+        final u = CurrentUserModel.fromJson(
+          jsonDecode(userJson) as Map<String, dynamic>,
+        );
+        await ZegoCallInvitationService.instance.onUserLogin(
+          userId: u.uid,
+          userName: u.name ?? u.uid,
+        );
+      }
       emit(const AuthState.authenticated());
     } catch (e) {
       emit(AuthState.error(message: e.toString()));

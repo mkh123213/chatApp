@@ -1,22 +1,3 @@
-import 'package:intl/intl.dart';
-
-extension StringFormate on String {
-  String imageProductFormate() {
-    return replaceAll(RegExp(r'^\["?|"\]?|"$'), '');
-  }
-
-  String toCapitalized() {
-    return '${this[0].toUpperCase()}${substring(1)}';
-  }
-
-  String convertLongString() {
-    final shortString = split(' ').sublist(0, split(' ').length - 1).join(' ');
-    return shortString;
-  }
-
-  String convertDataFormate() {
-    final now = DateTime.now();
-
-    return DateFormat('d MMM, y - h:mm a').format(now);
-  }
-}
+// Extensions now live in the reusable `core_extensions` package.
+// This file is kept as a re-export shim so existing imports keep working.
+export 'package:core_extensions/core_extensions.dart';

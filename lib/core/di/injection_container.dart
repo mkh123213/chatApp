@@ -38,13 +38,8 @@ import 'package:chat_material3/features/status/data/repositories/status_repo.dar
 import 'package:chat_material3/features/status/presentation/bloc/create_status_cubit/create_status_cubit.dart';
 import 'package:chat_material3/features/status/presentation/bloc/my_status_cubit/my_status_cubit.dart';
 import 'package:chat_material3/features/status/presentation/bloc/status_cubit/status_cubit.dart';
-import 'package:chat_material3/core/service/call_service/call_provider_service.dart';
-import 'package:chat_material3/core/service/zegocaller/zego_call_provider_service.dart';
 import 'package:chat_material3/features/calls/data/datasources/calls_remote_data_source.dart';
 import 'package:chat_material3/features/calls/data/repositories/calls_repo.dart';
-import 'package:chat_material3/features/calls/presentation/bloc/start_call_cubit/start_call_cubit.dart';
-import 'package:chat_material3/features/calls/presentation/bloc/incoming_call_cubit/incoming_call_cubit.dart';
-import 'package:chat_material3/features/calls/presentation/bloc/active_call_cubit/active_call_cubit.dart';
 import 'package:chat_material3/features/calls/presentation/bloc/calls_history_cubit/calls_history_cubit.dart';
 import 'package:chat_material3/features/profile/presentation/bloc/blocked_contacts_cubit.dart';
 import 'package:chat_material3/features/ai_assistant/data/ai_assistant_service.dart';
@@ -60,6 +55,7 @@ import 'package:chat_material3/core/app/upload_image/cubit/upload_image_cubit.da
 import 'package:chat_material3/core/app/upload_image/data_source/upload_image_data_source.dart';
 import 'package:chat_material3/core/app/upload_image/repo/upload_image_repo.dart';
 import 'package:chat_material3/core/service/fierstore/firestore_service.dart';
+import 'package:chat_material3/core/app/navigation/app_navigator_key.dart';
 
 final sl = GetIt.instance;
 
@@ -203,12 +199,12 @@ Future<void> _initChats() async {
 
 Future<void> _initCore() async {
   final dio = DioFactory.getDio();
-  final navigatorKey = GlobalKey<NavigatorState>();
 
   sl
     ..registerFactory(AppCubit.new)
     ..registerLazySingleton<ApiService>(() => ApiService(dio))
-    ..registerSingleton<GlobalKey<NavigatorState>>(navigatorKey)
+    // Same key ZegoUIKit uses (main.dart) so the prebuilt call screen can navigate.
+    ..registerSingleton<GlobalKey<NavigatorState>>(appNavigatorKey)
     ..registerLazySingleton(() => UploadImageDataSource(sl()))
     ..registerLazySingleton(() => UploadImageRepo(sl()))
     ..registerFactory(() => UploadImageCubit(sl()))
@@ -231,10 +227,9 @@ Future<void> _initAuth() async {
 }
 
 Future<void> _initCalls() async {
+  // Call signaling/UI is handled by ZegoUIKit's prebuilt invitation flow
+  // (see ZegoCallInvitationService). Only the call-history read path remains.
   sl
-    ..registerLazySingleton<CallProviderService>(
-      () => ZegoCallProviderService(),
-    )
     ..registerLazySingleton<CallsRemoteDataSource>(
       () => CallsRemoteDataSourceImpl(
         dataBaseService: sl<DataBaseService>(),
@@ -243,18 +238,6 @@ Future<void> _initCalls() async {
     ..registerLazySingleton<CallsRepo>(
       () => CallsRepoImpl(
         callsRemoteDataSource: sl<CallsRemoteDataSource>(),
-      ),
-    )
-    ..registerFactory<StartCallCubit>(
-      () => StartCallCubit(callsRepo: sl<CallsRepo>()),
-    )
-    ..registerFactory<IncomingCallCubit>(
-      () => IncomingCallCubit(callsRepo: sl<CallsRepo>()),
-    )
-    ..registerFactory<ActiveCallCubit>(
-      () => ActiveCallCubit(
-        callsRepo: sl<CallsRepo>(),
-        callProviderService: sl<CallProviderService>(),
       ),
     )
     ..registerFactory<CallsHistoryCubit>(

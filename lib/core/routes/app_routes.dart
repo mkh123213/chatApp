@@ -4,8 +4,6 @@ import 'package:chat_material3/core/helper_functions/get_current_user.dart';
 import 'package:chat_material3/features/auth/presentation/screens/forget_password_screen.dart';
 import 'package:chat_material3/features/auth/presentation/screens/login_screen.dart';
 import 'package:chat_material3/features/auth/presentation/screens/sign_up_screen.dart';
-import 'package:chat_material3/features/calls/data/models/call_model.dart';
-import 'package:chat_material3/features/calls/presentation/screens/call_screen.dart';
 import 'package:chat_material3/features/calls/presentation/screens/calls_history_screen.dart';
 import 'package:chat_material3/features/groups/data/models/group_model.dart';
 import 'package:chat_material3/features/groups/presentation/screens/group_info_screen.dart';
@@ -64,7 +62,6 @@ class AppRoutes {
   static const String status = 'status';
   static const String textStatus = 'textStatus';
   static const String statusViewer = 'statusViewer';
-  static const String callScreen = 'callScreen';
   static const String callsHistoryScreen = 'callsHistoryScreen';
   static const String newChat = 'newChat';
   static const String contactInfo = 'contactInfo';
@@ -188,12 +185,6 @@ class AppRoutes {
             create: (_) => sl<MyStatusCubit>()..subscribe(getCurrentUser().uid),
             child: const StatusViewerScreen(),
           ),
-          settings: settings,
-        );
-
-      case callScreen:
-        return BaseRoute(
-          page: CallScreen(call: args as CallModel),
           settings: settings,
         );
 

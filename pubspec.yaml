@@ -32,6 +32,8 @@ dependencies:
     sdk: flutter
   core_config:
     path: packages/core_config
+  core_extensions:
+    path: packages/core_extensions
   flutter_svg:
   iconsax:
   freezed: ^3.2.5
@@ -48,7 +50,7 @@ dependencies:
   flutter_bloc: ^9.1.1
   image_picker: ^1.2.2
   dio: ^5.9.2
-  connectivity_plus: ^7.1.1
+  connectivity_plus: ^6.1.0
   flutter_dotenv: ^6.0.1
   animate_do: ^5.1.0
   flutter_screenutil: ^5.9.3
@@ -77,15 +79,16 @@ dependencies:
   google_sign_in: ^7.2.0
   flutter_animate: ^4.5.2
   supabase_flutter: ^2.12.4
-  file_picker: ^8.1.7
+  file_picker: ^10.3.8
   url_launcher: ^6.3.2
   path: ^1.9.1
   cached_network_image: ^3.4.1
   record: ^6.0.0
   audioplayers: ^6.1.0
   path_provider: ^2.1.5
-  zego_express_engine: 3.0.0
-  flutter_callkit_incoming: ^2.0.4+1
+  zego_uikit: # version resolved transitively via zego_uikit_prebuilt_call
+  zego_uikit_prebuilt_call: ^4.23.1
+  zego_uikit_signaling_plugin: ^2.8.10
   uuid: ^4.5.1
   emoji_picker_flutter: ^4.4.0
   flutter_contacts: ^2.0.2

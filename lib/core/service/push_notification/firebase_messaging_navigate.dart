@@ -1,5 +1,4 @@
 import 'package:chat_material3/constants/fierstore_paths.dart';
-import 'package:chat_material3/core/service/call_service/callkit_service.dart';
 import 'package:chat_material3/core/service/pending_navigation/pending_navigation_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -49,10 +48,9 @@ class FirebaseMessagingNavigate {
     final data = message.data;
     final route = data['route'] as String? ?? '';
 
-    if (route == 'call') {
-      await _handleCallNotification(data);
-      return;
-    }
+    // Offline/background call invitations are handled by ZegoUIKit's signaling
+    // plugin + system calling UI, not by FCM.
+    if (route == 'call') return;
 
     await NotificationSaveService.save(message);
     _storePendingNavigation(data);
@@ -65,10 +63,8 @@ class FirebaseMessagingNavigate {
     final data = message.data;
     final route = data['route'] as String? ?? '';
 
-    if (route == 'call') {
-      await _handleCallNotification(data);
-      return;
-    }
+    // Offline/background call invitations are handled by ZegoUIKit.
+    if (route == 'call') return;
 
     await NotificationSaveService.save(message);
     _storePendingNavigation(data);
@@ -175,19 +171,5 @@ class FirebaseMessagingNavigate {
     } catch (e) {
       debugPrint('Navigation to group failed: $e');
     }
-  }
-
-  static Future<void> _handleCallNotification(Map<String, dynamic> data) async {
-    final callId = data['callId'] as String? ?? '';
-    final callerName = data['callerName'] as String? ?? 'Unknown';
-    final callerPhotoUrl = data['callerPhotoUrl'] as String? ?? '';
-    final callType = data['callType'] as String? ?? 'audio';
-
-    await CallKitService.instance.showIncomingCall(
-      callId: callId,
-      callerName: callerName,
-      callerAvatar: callerPhotoUrl,
-      isVideo: callType == 'video',
-    );
   }
 }

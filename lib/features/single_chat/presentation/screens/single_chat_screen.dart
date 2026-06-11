@@ -10,9 +10,10 @@ import 'package:chat_material3/core/helper_functions/get_current_user.dart';
 import 'package:chat_material3/core/language/lang_keys.dart';
 import 'package:chat_material3/core/routes/app_routes.dart';
 import 'package:chat_material3/core/service/push_notification/active_chat_tracker.dart';
+import 'package:chat_material3/core/service/call_service/zego_call_invitation_service.dart';
 import 'package:chat_material3/core/service/wallpaper/wallpaper_service.dart';
-import 'package:chat_material3/features/calls/presentation/bloc/start_call_cubit/start_call_cubit.dart';
-import 'package:chat_material3/features/calls/presentation/bloc/start_call_cubit/start_call_state.dart';
+import 'package:zego_uikit/zego_uikit.dart';
+import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 import 'package:chat_material3/features/single_chat/data/models/chat_model.dart';
 import 'package:chat_material3/features/single_chat/data/models/message_model.dart';
 import 'package:chat_material3/features/single_chat/data/repositories/chats_repo.dart';
@@ -92,9 +93,6 @@ class _SingleChatScreenState extends State<SingleChatScreen> {
         BlocProvider(
           create: (_) => sl<SendMessageCubit>(),
         ),
-        BlocProvider(
-          create: (_) => sl<StartCallCubit>(),
-        ),
         if (friendId.isNotEmpty)
           BlocProvider(
             create: (_) =>
@@ -127,19 +125,6 @@ class _SingleChatScreenState extends State<SingleChatScreen> {
                   message:
                       context.translate(LangKeys.messageDeletedSuccessfully),
                 );
-              }
-            },
-          ),
-          BlocListener<StartCallCubit, StartCallState>(
-            listener: (context, state) {
-              if (state is StartCallSuccess) {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.callScreen,
-                  arguments: state.call,
-                );
-              } else if (state is StartCallError) {
-                ShowToast.showToastErrorTop(message: state.message);
               }
             },
           ),
@@ -408,18 +393,26 @@ class _SingleChatHeader extends StatelessWidget {
                 );
               },
               actions: [
-                if (!isBlocked) ...[
-                  IconButton(
-                    icon: const Icon(Icons.videocam),
-                    onPressed: () => context
-                        .read<StartCallCubit>()
-                        .startVideoCall(chat: chat),
+                if (!isBlocked && friendId.isNotEmpty) ...[
+                  ZegoSendCallInvitationButton(
+                    isVideoCall: true,
+                    resourceID: kZegoCallResourceID,
+                    buttonSize: const Size(44, 44),
+                    iconSize: const Size(26, 26),
+                    invitees: [
+                      ZegoUIKitUser(id: friendId, name: friendDisplayName),
+                    ],
+                    icon: ButtonIcon(icon: const Icon(Icons.videocam)),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.call),
-                    onPressed: () => context
-                        .read<StartCallCubit>()
-                        .startAudioCall(chat: chat),
+                  ZegoSendCallInvitationButton(
+                    isVideoCall: false,
+                    resourceID: kZegoCallResourceID,
+                    buttonSize: const Size(44, 44),
+                    iconSize: const Size(26, 26),
+                    invitees: [
+                      ZegoUIKitUser(id: friendId, name: friendDisplayName),
+                    ],
+                    icon: ButtonIcon(icon: const Icon(Icons.call)),
                   ),
                 ],
                 PopupMenuButton<String>(

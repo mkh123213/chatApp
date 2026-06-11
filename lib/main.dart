@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -19,13 +18,28 @@ import 'package:chat_material3/core/service/shared_pref/pref_keys.dart';
 import 'package:chat_material3/core/service/shared_pref/shared_pref.dart';
 import 'package:chat_material3/core/service/push_notification/chat_notification_service.dart';
 import 'package:chat_material3/core/service/user_presence/user_presence_service.dart';
-import 'package:chat_material3/core/service/call_service/callkit_service.dart';
+import 'package:chat_material3/core/service/call_service/zego_call_invitation_service.dart';
+import 'package:chat_material3/core/app/navigation/app_navigator_key.dart';
 import 'package:chat_material3/core/service/dnd/dnd_service.dart';
 import 'package:chat_material3/core/service/wallpaper/wallpaper_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:zego_uikit/zego_uikit.dart';
+import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
+import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  /// 1.1.2: set navigator key to ZegoUIKitPrebuiltCallInvitationService.
+  /// Must be the SAME key passed to MaterialApp (see app_navigator_key.dart).
+  ZegoUIKitPrebuiltCallInvitationService().setNavigatorKey(appNavigatorKey);
+
+  // call the useSystemCallingUI
+  await ZegoUIKit().initLog().then((value) async {
+    await ZegoUIKitPrebuiltCallInvitationService().useSystemCallingUI(
+      [ZegoUIKitSignalingPlugin()],
+    );
+  });
 
   await EnvVariable.instance.init(envType: EnvTypeEnum.dev);
 
@@ -74,7 +88,9 @@ void main() async {
   // CallKit and Hive are independent, so run them alongside it.
   await Future.wait([
     SharedPref().instantiatePreferences(),
-    CallKitService.instance.init(),
+    // Old custom CallKit flow disabled — prebuilt UIKit (useSystemCallingUI
+    // above) now owns the native calling UI. Re-enabling both would conflict.
+    // CallKitService.instance.init(),
     HiveDatabase().setup(),
   ]);
 
@@ -90,6 +106,11 @@ void main() async {
       final user = getCurrentUser();
       sl<UserPresenceService>().start(userId: user.uid);
       ChatNotificationService.instance.saveFcmToken(userId: user.uid);
+      // Re-arm call invitations for the already-signed-in user on cold start.
+      await ZegoCallInvitationService.instance.onUserLogin(
+        userId: user.uid,
+        userName: user.name ?? user.uid,
+      );
     } catch (_) {}
   }
 
