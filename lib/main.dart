@@ -33,7 +33,7 @@ void main() async {
   /// 1.1.2: set navigator key to ZegoUIKitPrebuiltCallInvitationService.
   /// Must be the SAME key passed to MaterialApp (see app_navigator_key.dart).
   ZegoUIKitPrebuiltCallInvitationService().setNavigatorKey(appNavigatorKey);
-
+// 
   // call the useSystemCallingUI
   await ZegoUIKit().initLog().then((value) async {
     await ZegoUIKitPrebuiltCallInvitationService().useSystemCallingUI(
